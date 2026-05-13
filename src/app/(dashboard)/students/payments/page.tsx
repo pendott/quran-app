@@ -22,7 +22,10 @@ export default async function StudentsPaymentsPage() {
   return (
     <div className="space-y-6">
       {dbError ? <DbBanner message="Database unavailable." /> : null}
-      <SectionCard title="Payments and packages" description="Receipts and demo package checkout.">
+      <SectionCard
+        title="Payments and packages"
+        description="Parents pay for linked children; students with their own login pay for themselves. The signed-in user is stored as payer on each payment."
+      >
         <BuyPackagesSection
           packages={packages.map((p) => ({
             id: p.id,

@@ -31,6 +31,9 @@ export function BuyPackagesSection({ packages, students }: Props) {
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-semibold text-slate-900">Buy a package</h3>
+      <p className="text-xs leading-relaxed text-slate-500">
+        Credits attach to the student you select. Parents choose a linked child; a student account only sees themselves. The payer is always whoever is signed in.
+      </p>
       {state?.ok ? (
         <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
           Package added to your account.

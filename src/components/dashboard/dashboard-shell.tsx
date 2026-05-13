@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import type { ReactNode } from "react";
 import type { NavItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,13 @@ export function DashboardShell({
             <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Signed in as</p>
             <p className="mt-2 text-base font-semibold">{userName}</p>
             <p className="mt-1 text-sm text-slate-300">{roleLabel} workspace</p>
+            <button
+              type="button"
+              onClick={() => void signOut({ callbackUrl: "/login" })}
+              className="mt-4 w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
+            >
+              Sign out
+            </button>
           </div>
 
           <nav className="mt-8 space-y-2">
