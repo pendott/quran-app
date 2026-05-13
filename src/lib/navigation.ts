@@ -54,6 +54,12 @@ export function resolvePostLoginPath(callbackUrl: string, role: UserRole) {
   if (!isSafeRelativeAppPath(trimmed)) {
     return getDashboardHomeForRole(role);
   }
+  if (
+    (role === "STUDENT" || role === "PARENT") &&
+    (trimmed === "/checkout" || trimmed.startsWith("/checkout/"))
+  ) {
+    return trimmed;
+  }
   const prefix = dashboardPathPrefixByRole[role];
   if (trimmed === prefix || trimmed.startsWith(`${prefix}/`)) {
     return trimmed;

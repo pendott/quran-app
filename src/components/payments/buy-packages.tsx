@@ -1,7 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
-import { purchasePackageForStudentAction } from "@/app/actions/package-purchase";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect } from "react";
+import {
+  startMockMalaysiaPackageCheckoutAction,
+} from "@/app/actions/mock-malaysia-checkout";
 import { formatMYR } from "@/lib/format";
 import type { BookingStudentOption } from "@/components/booking/family-booking-form";
 
@@ -19,28 +22,30 @@ type Props = {
 };
 
 export function BuyPackagesSection({ packages, students }: Props) {
-  const [state, formAction, pending] = useActionState(purchasePackageForStudentAction, {
-    ok: false,
-    error: null as string | null,
-  });
+  const router = useRouter();
+  const [state, formAction, pending] = useActionState(startMockMalaysiaPackageCheckoutAction, undefined);
+
+  useEffect(() => {
+    if (!state?.ok || !state.paymentId) return;
+    router.push(`/checkout/mock/${state.paymentId}`);
+  }, [state, router]);
 
   if (!packages.length || !students.length) {
     return null;
   }
 
+  const err = state && !state.ok ? state.error : null;
+
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-semibold text-slate-900">Buy a package</h3>
       <p className="text-xs leading-relaxed text-slate-500">
-        Credits attach to the student you select. Parents choose a linked child; a student account only sees themselves. The payer is always whoever is signed in.
+        Credits attach to the student you select. Parents choose a linked child; a student account only sees themselves.
+        The payer is always whoever is signed in. You will go through a <strong>mock Malaysia-style</strong> checkout
+        (review → FPX / card / eWallet → processing) before credits are added.
       </p>
-      {state?.ok ? (
-        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Package added to your account.
-        </p>
-      ) : null}
-      {state && "error" in state && state.error ? (
-        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{state.error}</p>
+      {err ? (
+        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{err}</p>
       ) : null}
       <div className="grid gap-4 md:grid-cols-2">
         {packages.map((pkg) => (
@@ -71,7 +76,7 @@ export function BuyPackagesSection({ packages, students }: Props) {
               disabled={pending}
               className="mt-auto rounded-full bg-teal-600 py-2 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50"
             >
-              {pending ? "Processing…" : "Pay with manual provider (demo)"}
+              {pending ? "Starting checkout…" : "Pay with mock Malaysia gateway (demo)"}
             </button>
           </form>
         ))}
