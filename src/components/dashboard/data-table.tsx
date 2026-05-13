@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { TableRow } from "@/lib/types";
 
 type DataTableProps = {
@@ -26,7 +27,7 @@ export function DataTable({ columns, rows }: DataTableProps) {
             <tr key={rowIndex} className="align-top">
               {columns.map((column) => (
                 <td key={column} className="px-4 py-4 text-sm text-slate-600">
-                  {row[column] ?? "-"}
+                  {renderCell(row[column])}
                 </td>
               ))}
             </tr>
@@ -35,4 +36,9 @@ export function DataTable({ columns, rows }: DataTableProps) {
       </table>
     </div>
   );
+}
+
+function renderCell(value: ReactNode) {
+  if (value === null || value === undefined || value === "") return "-";
+  return value;
 }

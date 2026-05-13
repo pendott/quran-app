@@ -1,28 +1,28 @@
 import Link from "next/link";
 import { Plus, Search, Users } from "lucide-react";
+import { DbBanner } from "@/components/dashboard/db-banner";
 import { DataTable } from "@/components/dashboard/data-table";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { studentDirectoryRows } from "@/lib/dashboard-data";
+import { getAdminStudentRoster } from "@/server/queries/admin";
 
-const rosterStats = [
-  { label: "Active students", value: "128", change: "12 new this month", tone: "emerald" as const },
-  { label: "Linked parents", value: "104", change: "2 invites pending", tone: "sky" as const },
-  { label: "Trials ending", value: "6", change: "Within 7 days", tone: "amber" as const },
-];
+export default async function AdminStudentsPage() {
+  const { rows, stats, dbError } = await getAdminStudentRoster();
 
-export default function AdminStudentsPage() {
   return (
     <div className="space-y-6">
+      {dbError ? (
+        <DbBanner message="Database unavailable. Set DATABASE_URL, run npm run db:push and npm run db:seed." />
+      ) : null}
       <section className="grid gap-4 md:grid-cols-3">
-        {rosterStats.map((stat) => (
+        {stats.map((stat) => (
           <StatCard key={stat.label} {...stat} />
         ))}
       </section>
 
       <SectionCard
         title="Student roster"
-        description="Manage learner profiles, parent links, assigned teachers, and progress checkpoints. Connect your database to replace sample rows."
+        description="Learner profiles, parent links, assigned teachers, and progress checkpoints."
       >
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1 sm:max-w-md">
@@ -52,16 +52,18 @@ export default function AdminStudentsPage() {
           </div>
         </div>
 
-        <DataTable columns={["Student", "Parent", "Teacher", "Progress", "Status"]} rows={studentDirectoryRows} />
+        {rows.length ? (
+          <DataTable columns={["Student", "Parent", "Teacher", "Progress", "Status"]} rows={rows} />
+        ) : (
+          <p className="text-sm text-slate-500">No students yet. Run the database seed.</p>
+        )}
 
         <p className="mt-5 text-sm leading-6 text-slate-500">
-          Next step: wire this table to{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-800">prisma.student</code> with
-          filters and pagination.{" "}
+          Demo accounts: <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">admin@demo.local</code>,{" "}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">parent@demo.local</code>.{" "}
           <Link href="/admin/teachers" className="font-medium text-teal-700 hover:underline">
             Manage teachers
-          </Link>{" "}
-          to control who appears in assignment pickers.
+          </Link>
         </p>
       </SectionCard>
     </div>

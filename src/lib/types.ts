@@ -15,7 +15,9 @@ export type Stat = {
   tone?: "emerald" | "sky" | "amber" | "violet";
 };
 
-export type TableRow = Record<string, string>;
+import type { ReactNode } from "react";
+
+export type TableRow = Record<string, ReactNode>;
 
 export type TimelineItem = {
   title: string;

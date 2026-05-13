@@ -1,17 +1,24 @@
+import { DbBanner } from "@/components/dashboard/db-banner";
 import { DataTable } from "@/components/dashboard/data-table";
 import { SectionCard } from "@/components/dashboard/section-card";
-import { teacherDirectoryRows } from "@/lib/dashboard-data";
+import { getAdminTeachersDirectory } from "@/server/queries/admin";
 
-export default function AdminTeachersPage() {
+export default async function AdminTeachersPage() {
+  const { rows, dbError } = await getAdminTeachersDirectory();
+
   return (
-    <SectionCard
-      title="Teacher management"
-      description="Editable teacher directory shell for profile, timezone, capacity, and booking readiness."
-    >
-      <DataTable
-        columns={["Teacher", "Specialty", "Timezone", "Students", "Availability"]}
-        rows={teacherDirectoryRows}
-      />
-    </SectionCard>
+    <div className="space-y-4">
+      {dbError ? <DbBanner message="Database unavailable." /> : null}
+      <SectionCard
+        title="Teacher management"
+        description="Teacher directory with capacity signals from assignments and availability rows."
+      >
+        {rows.length ? (
+          <DataTable columns={["Teacher", "Specialty", "Timezone", "Students", "Availability"]} rows={rows} />
+        ) : (
+          <p className="text-sm text-slate-500">No teachers yet. Run the database seed.</p>
+        )}
+      </SectionCard>
+    </div>
   );
 }

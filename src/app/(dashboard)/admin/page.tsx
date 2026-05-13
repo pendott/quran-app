@@ -1,21 +1,28 @@
 import Link from "next/link";
+import { DbBanner } from "@/components/dashboard/db-banner";
 import { DataTable } from "@/components/dashboard/data-table";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { adminStats, pendingPaymentRows, upcomingClassRows } from "@/lib/dashboard-data";
+import { getAdminDashboardData } from "@/server/queries/admin";
 
 const quickLinks = [
   { href: "/admin/students", label: "Students", detail: "Roster, parents, assignments" },
   { href: "/admin/teachers", label: "Teachers", detail: "Profiles and availability" },
   { href: "/admin/bookings", label: "Bookings", detail: "Schedule and status" },
   { href: "/admin/payments", label: "Payments", detail: "Gateway and refunds" },
+  { href: "/api/admin/reports/export", label: "Export bookings (CSV)", detail: "Download last 500 bookings" },
 ];
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const { stats, upcomingRows, pendingPaymentRows, dbError } = await getAdminDashboardData();
+
   return (
     <div className="space-y-6">
+      {dbError ? (
+        <DbBanner message="Database unavailable. Set DATABASE_URL, run npm run db:push and npm run db:seed, then refresh." />
+      ) : null}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {adminStats.map((stat) => (
+        {stats.map((stat) => (
           <StatCard key={stat.label} {...stat} />
         ))}
       </section>
@@ -40,11 +47,19 @@ export default function AdminDashboardPage() {
           title="Upcoming classes"
           description="Confirmed and pending sessions for the next 48 hours."
         >
-          <DataTable columns={["Student", "Teacher", "Time", "Plan", "Status"]} rows={upcomingClassRows} />
+          {upcomingRows.length ? (
+            <DataTable columns={["Student", "Teacher", "Time", "Plan", "Status"]} rows={upcomingRows} />
+          ) : (
+            <p className="text-sm text-slate-500">No upcoming classes in this window.</p>
+          )}
         </SectionCard>
 
         <SectionCard title="Pending payments" description="Follow up before classes start without credits.">
-          <DataTable columns={["Invoice", "Student", "Amount", "Method", "Status"]} rows={pendingPaymentRows} />
+          {pendingPaymentRows.length ? (
+            <DataTable columns={["Invoice", "Student", "Amount", "Method", "Status"]} rows={pendingPaymentRows} />
+          ) : (
+            <p className="text-sm text-slate-500">No pending payments.</p>
+          )}
         </SectionCard>
       </section>
     </div>

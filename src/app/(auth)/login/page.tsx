@@ -1,4 +1,7 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
+import { Suspense } from "react";
+import { LoginForm } from "@/components/auth/login-form";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -24,7 +27,6 @@ const roleCards = [
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const callbackUrl = typeof params.callbackUrl === "string" ? params.callbackUrl : "/students";
-  const signInHref = `/api/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-8 px-4 py-10 md:px-6 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
@@ -46,29 +48,29 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </section>
 
       <section className="rounded-[36px] border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-950/5 md:p-10">
-        <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Initial setup</p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Sign in to Quran Class</h2>
+        <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Sign in</p>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Quran Class</h2>
         <p className="mt-4 text-sm leading-7 text-slate-600">
-          Use your school credentials. If you arrived from the marketing site without a callback, you will land in the
-          family portal after sign-in.
+          Default redirect after login is the family portal unless <code className="text-xs">callbackUrl</code> is set
+          (for example from the marketing site). Current callback:{" "}
+          <span className="font-mono text-xs text-slate-800">{callbackUrl}</span>
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href={signInHref}
-            className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-          >
-            Continue to sign in
-          </Link>
+        <div className="mt-8">
+          <Suspense fallback={<p className="text-sm text-slate-500">Loading form…</p>}>
+            <LoginForm />
+          </Suspense>
+        </div>
+        <div className="mt-6">
           <Link
             href="/"
-            className="rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            Back to overview
+            Back to home
           </Link>
         </div>
         <div className="mt-8 rounded-[24px] border border-amber-200 bg-amber-50 p-5 text-sm leading-7 text-amber-900">
-          Keep all provider keys server-side in environment variables. Never expose Zoom, WhatsApp, email, or
-          payment secrets in client components.
+          Keep all provider keys server-side in environment variables. Never expose Zoom, WhatsApp, email, or payment
+          secrets in client components.
         </div>
       </section>
     </main>

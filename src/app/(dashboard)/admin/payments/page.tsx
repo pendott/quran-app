@@ -1,17 +1,24 @@
+import { DbBanner } from "@/components/dashboard/db-banner";
 import { DataTable } from "@/components/dashboard/data-table";
 import { SectionCard } from "@/components/dashboard/section-card";
-import { paymentRows } from "@/lib/dashboard-data";
+import { getAdminPaymentsTable } from "@/server/queries/admin";
 
-export default function AdminPaymentsPage() {
+export default async function AdminPaymentsPage() {
+  const { rows, dbError } = await getAdminPaymentsTable();
+
   return (
-    <SectionCard
-      title="Payment ledger"
-      description="Gateway-ready payment table for per-session and package transactions."
-    >
-      <DataTable
-        columns={["Payment", "Student", "Amount", "Gateway", "Purpose", "Status"]}
-        rows={paymentRows}
-      />
-    </SectionCard>
+    <div className="space-y-4">
+      {dbError ? <DbBanner message="Database unavailable." /> : null}
+      <SectionCard
+        title="Payment ledger"
+        description="Gateway-ready payment table for per-session and package transactions."
+      >
+        {rows.length ? (
+          <DataTable columns={["Payment", "Student", "Amount", "Gateway", "Purpose", "Status"]} rows={rows} />
+        ) : (
+          <p className="text-sm text-slate-500">No payments yet.</p>
+        )}
+      </SectionCard>
+    </div>
   );
 }

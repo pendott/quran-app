@@ -125,15 +125,25 @@ async function main() {
     ],
   });
 
-  await prisma.teacherAvailability.create({
-    data: {
-      teacherId: teacher.id,
-      type: "RECURRING",
-      dayOfWeek: 1,
-      startTime: "18:00",
-      endTime: "21:00",
-      slotDurationMinutes: 60,
-    },
+  await prisma.teacherAvailability.createMany({
+    data: [
+      {
+        teacherId: teacher.id,
+        type: "RECURRING",
+        dayOfWeek: 1,
+        startTime: "18:00",
+        endTime: "21:00",
+        slotDurationMinutes: 60,
+      },
+      {
+        teacherId: teacher.id,
+        type: "RECURRING",
+        dayOfWeek: 3,
+        startTime: "18:00",
+        endTime: "20:00",
+        slotDurationMinutes: 60,
+      },
+    ],
   });
 
   const perSession = await prisma.pricingRule.create({
@@ -158,7 +168,7 @@ async function main() {
     },
   });
 
-  await prisma.package.create({
+  const pkg4 = await prisma.package.create({
     data: {
       name: "4 classes",
       type: PackageType.SESSION_BUNDLE,
@@ -168,6 +178,17 @@ async function main() {
       durationDays: 90,
       isActive: true,
       pricingRuleId: bundle4.id,
+    },
+  });
+
+  await prisma.packagePurchase.create({
+    data: {
+      packageId: pkg4.id,
+      studentId: studentWithParent.id,
+      purchasedById: parentUser.id,
+      status: "ACTIVE",
+      totalCredits: 4,
+      usedCredits: 0,
     },
   });
 
