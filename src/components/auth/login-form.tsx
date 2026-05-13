@@ -1,13 +1,15 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
+import { resolvePostLoginPath } from "@/lib/navigation";
+import type { UserRole } from "@/lib/types";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/students";
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -28,10 +30,11 @@ export function LoginForm() {
       setError("Invalid email or password.");
       return;
     }
-    if (res?.url) {
-      router.push(res.url);
-      router.refresh();
-    }
+    const session = await getSession();
+    const role = (session?.user?.role as UserRole | undefined) ?? "STUDENT";
+    const next = resolvePostLoginPath(callbackUrl, role);
+    router.push(next);
+    router.refresh();
   }
 
   return (

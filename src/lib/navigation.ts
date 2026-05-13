@@ -32,3 +32,31 @@ const defaultRouteByRole: Record<UserRole, string> = {
 export function getDashboardHomeForRole(role: UserRole) {
   return defaultRouteByRole[role];
 }
+
+const dashboardPathPrefixByRole: Record<UserRole, string> = {
+  ADMIN: "/admin",
+  TEACHER: "/teacher",
+  STUDENT: "/students",
+  PARENT: "/students",
+};
+
+/** Reject open redirects and non-app URLs. */
+function isSafeRelativeAppPath(path: string) {
+  return path.startsWith("/") && !path.startsWith("//") && !path.includes("://");
+}
+
+/**
+ * After credentials sign-in, send the user to their workspace.
+ * Honors `callbackUrl` only when it stays under that role’s dashboard prefix.
+ */
+export function resolvePostLoginPath(callbackUrl: string, role: UserRole) {
+  const trimmed = callbackUrl.trim() || "/";
+  if (!isSafeRelativeAppPath(trimmed)) {
+    return getDashboardHomeForRole(role);
+  }
+  const prefix = dashboardPathPrefixByRole[role];
+  if (trimmed === prefix || trimmed.startsWith(`${prefix}/`)) {
+    return trimmed;
+  }
+  return getDashboardHomeForRole(role);
+}
