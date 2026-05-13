@@ -23,7 +23,7 @@ const roleCards = [
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const callbackUrl = typeof params.callbackUrl === "string" ? params.callbackUrl : "/";
+  const callbackUrl = typeof params.callbackUrl === "string" ? params.callbackUrl : "/students";
   const signInHref = `/api/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
   return (
@@ -32,8 +32,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <p className="text-sm uppercase tracking-[0.28em] text-teal-200">Role-based authentication</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight">Secure access for every role</h1>
         <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300">
-          Auth.js is wired with Prisma and credentials-based sign in. After you push the schema and seed your
-          first users, this flow will route each user to the correct workspace.
+          Sign in with the email and password your school issued. You will be routed to the admin console, teacher
+          desk, or family portal based on your role.
         </p>
         <div className="mt-8 grid gap-4">
           {roleCards.map((card) => (
@@ -47,10 +47,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       <section className="rounded-[36px] border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-950/5 md:p-10">
         <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Initial setup</p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Open the secure sign-in flow</h2>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Sign in to Quran Class</h2>
         <p className="mt-4 text-sm leading-7 text-slate-600">
-          This phase scaffolds the auth structure. Once the database is connected, create your admin, teacher,
-          and family accounts with password hashes, then use the Auth.js sign-in endpoint below.
+          Use your school credentials. If you arrived from the marketing site without a callback, you will land in the
+          family portal after sign-in.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link

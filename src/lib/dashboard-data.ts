@@ -14,7 +14,7 @@ export const teacherStats: Stat[] = [
   { label: "Attendance rate", value: "96%", change: "Trailing 30 days", tone: "violet" },
 ];
 
-export const portalStats: Stat[] = [
+export const studentStats: Stat[] = [
   { label: "Next class", value: "Today 7:30 PM", change: "Ustaz Ahmad", tone: "sky" },
   { label: "Package balance", value: "5 credits", change: "Expires in 24 days", tone: "emerald" },
   { label: "Completed sessions", value: "22", change: "4 this month", tone: "violet" },
@@ -69,7 +69,7 @@ export const teacherStudentRows: TableRow[] = [
   { Student: "Hana Zulaikha", LastClass: "Last week", LastSurah: "Yasin", Focus: "Stops and starts", Homework: "Memorize 3 ayah" },
 ];
 
-export const portalBookingRows: TableRow[] = [
+export const studentBookingRows: TableRow[] = [
   { Slot: "Mon, 7:30 PM", Teacher: "Ustaz Ahmad", Package: "Use 1 credit", Meeting: "Auto-create Zoom", Status: "Best match" },
   { Slot: "Tue, 8:30 PM", Teacher: "Ustazah Huda", Package: "Pay per session", Meeting: "Auto-create Zoom", Status: "Available" },
   { Slot: "Thu, 5:00 PM", Teacher: "Ustaz Imran", Package: "Monthly package", Meeting: "Auto-create Zoom", Status: "Few seats left" },

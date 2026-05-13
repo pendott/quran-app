@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Quran Class SaaS",
-  description: "Role-based SaaS foundation for booking, teaching, payments, and Quran reciting progress.",
+  title: "Quran Class — Online Quran school software",
+  description:
+    "Book teachers, run live classes, take payments, and track Quran recitation progress for your school in one place.",
 };
 
 export default function RootLayout({

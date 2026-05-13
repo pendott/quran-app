@@ -11,6 +11,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       navItems={adminNavItems}
       roleLabel="Admin"
       userName={session.user.name ?? session.user.email ?? "Admin user"}
+      workspaceTitle="Admin console"
+      workspaceTagline="Teachers, students, bookings, and payments in one place."
     >
       {children}
     </DashboardShell>

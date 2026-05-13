@@ -10,10 +10,19 @@ type DashboardShellProps = {
   navItems: NavItem[];
   roleLabel: string;
   userName: string;
+  workspaceTitle: string;
+  workspaceTagline: string;
   children: ReactNode;
 };
 
-export function DashboardShell({ navItems, roleLabel, userName, children }: DashboardShellProps) {
+export function DashboardShell({
+  navItems,
+  roleLabel,
+  userName,
+  workspaceTitle,
+  workspaceTagline,
+  children,
+}: DashboardShellProps) {
   const pathname = usePathname();
 
   return (
@@ -62,11 +71,11 @@ export function DashboardShell({ navItems, roleLabel, userName, children }: Dash
         <main className="rounded-[32px] border border-slate-200/80 bg-white/80 p-4 shadow-sm shadow-slate-950/5 backdrop-blur md:p-6 xl:p-8">
           <div className="mb-6 flex flex-col gap-3 rounded-[28px] border border-slate-200/80 bg-slate-50/80 p-5 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-teal-700">Modern SaaS foundation</p>
-              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Quran Reciting Class Management System</h1>
+              <p className="text-sm uppercase tracking-[0.2em] text-teal-700">{workspaceTitle}</p>
+              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{workspaceTagline}</h1>
             </div>
             <div className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200">
-              Clean layout, role-aware routing, Prisma-ready schema
+              Quran Class
             </div>
           </div>
           <div className="space-y-6">{children}</div>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ClassNoteFormPreview } from "@/components/dashboard/class-note-form-preview";
 import { DataTable } from "@/components/dashboard/data-table";
 import { SectionCard } from "@/components/dashboard/section-card";
@@ -12,6 +13,23 @@ export default function TeacherDashboardPage() {
           <StatCard key={stat.label} {...stat} />
         ))}
       </section>
+
+      <SectionCard title="Shortcuts" description="Move quickly between your main teaching workflows.">
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/teacher/classes"
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+          >
+            All classes
+          </Link>
+          <Link
+            href="/teacher/students"
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+          >
+            My students
+          </Link>
+        </div>
+      </SectionCard>
 
       <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <SectionCard
