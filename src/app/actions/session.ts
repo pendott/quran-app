@@ -2,6 +2,7 @@
 
 import { AttendanceStatus, SessionStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { getTeacherByUserId } from "@/server/queries/teacher";
@@ -54,6 +55,34 @@ export async function completeClassSessionAction(formData: FormData): Promise<vo
     });
     revalidatePath("/teacher/classes");
     revalidatePath(`/teacher/session/${classSessionId}`);
+  } catch {
+    // ignore
+  }
+}
+
+const attendanceValue = z.nativeEnum(AttendanceStatus);
+
+export async function updateSessionAttendanceAction(formData: FormData): Promise<void> {
+  const session = await auth();
+  const classSessionId = String(formData.get("sessionId") ?? "");
+  const target = String(formData.get("target") ?? "");
+  const valueRaw = String(formData.get("value") ?? "");
+  if (!session?.user?.id || !classSessionId || (target !== "teacher" && target !== "student")) return;
+
+  const parsed = attendanceValue.safeParse(valueRaw);
+  if (!parsed.success) return;
+
+  try {
+    await assertTeacherOwnsSession(session.user.id, classSessionId);
+    await prisma.classSession.update({
+      where: { id: classSessionId },
+      data:
+        target === "teacher"
+          ? { teacherAttendance: parsed.data }
+          : { studentAttendance: parsed.data },
+    });
+    revalidatePath(`/teacher/session/${classSessionId}`);
+    revalidatePath("/teacher/classes");
   } catch {
     // ignore
   }

@@ -32,13 +32,10 @@ export function FamilyBookingForm({ teachers, students }: Props) {
   }, [weekOffset]);
 
   useEffect(() => {
-    if (!teacherId) {
-      setSlots([]);
-      return;
-    }
+    if (!teacherId) return;
     let cancelled = false;
-    setSlotsLoading(true);
     void (async () => {
+      setSlotsLoading(true);
       const res = await getBookingSlotsAction(teacherId, weekStart.toISOString());
       if (!cancelled) {
         setSlots(res.ok ? res.slots : []);

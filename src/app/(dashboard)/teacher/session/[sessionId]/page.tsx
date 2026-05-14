@@ -1,7 +1,8 @@
+import { AttendanceStatus } from "@prisma/client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
-import { completeClassSessionAction, startClassSessionAction } from "@/app/actions/session";
+import { completeClassSessionAction, startClassSessionAction, updateSessionAttendanceAction } from "@/app/actions/session";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { ClassNoteEditor } from "@/components/teacher/class-note-editor";
 import { RecordingEditor } from "@/components/teacher/recording-editor";
@@ -47,6 +48,8 @@ export default async function TeacherSessionPage({ params }: Props) {
     visibleToFamily: cs.recording?.visibleToFamily ?? true,
   };
 
+  const attOptions = Object.values(AttendanceStatus);
+
   return (
     <div className="space-y-6">
       <SectionCard
@@ -85,6 +88,49 @@ export default async function TeacherSessionPage({ params }: Props) {
           <Link href="/teacher/classes" className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 underline">
             Back to classes
           </Link>
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Attendance" description="Update attendance before or after the class ends.">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <form action={updateSessionAttendanceAction} className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+            <input type="hidden" name="sessionId" value={sessionId} />
+            <input type="hidden" name="target" value="teacher" />
+            <p className="mb-2 text-sm font-medium text-slate-800">Teacher</p>
+            <select
+              name="value"
+              defaultValue={cs.teacherAttendance}
+              className="mb-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+            >
+              {attOptions.map((v) => (
+                <option key={v} value={v}>
+                  {v.replace(/_/g, " ")}
+                </option>
+              ))}
+            </select>
+            <button type="submit" className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+              Save teacher
+            </button>
+          </form>
+          <form action={updateSessionAttendanceAction} className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+            <input type="hidden" name="sessionId" value={sessionId} />
+            <input type="hidden" name="target" value="student" />
+            <p className="mb-2 text-sm font-medium text-slate-800">Student</p>
+            <select
+              name="value"
+              defaultValue={cs.studentAttendance}
+              className="mb-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+            >
+              {attOptions.map((v) => (
+                <option key={v} value={v}>
+                  {v.replace(/_/g, " ")}
+                </option>
+              ))}
+            </select>
+            <button type="submit" className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+              Save student
+            </button>
+          </form>
         </div>
       </SectionCard>
 

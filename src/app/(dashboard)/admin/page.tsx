@@ -11,6 +11,7 @@ const quickLinks = [
   { href: "/admin/bookings", label: "Bookings", detail: "Schedule and status" },
   { href: "/admin/payments", label: "Payments", detail: "Gateway and refunds" },
   { href: "/api/admin/reports/export", label: "Export bookings (CSV)", detail: "Download last 500 bookings" },
+  { href: "/api/admin/reports/payments-export", label: "Export payments (CSV)", detail: "Download last 500 payments" },
 ];
 
 export default async function AdminDashboardPage() {

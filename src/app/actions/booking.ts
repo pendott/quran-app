@@ -160,6 +160,37 @@ export async function createFamilyBookingAction(_prev: unknown, formData: FormDa
       }
     });
 
+    try {
+      const booking = await prisma.booking.findFirst({
+        where: { studentId, teacherId, scheduledStartAt: slotStartDate },
+        orderBy: { createdAt: "desc" },
+        include: { teacher: true },
+      });
+      if (booking) {
+        const reminderAt = new Date(Math.max(Date.now() + 120_000, slotStartDate.getTime() - 24 * 60 * 60 * 1000));
+        await prisma.reminder.createMany({
+          data: [
+            {
+              bookingId: booking.id,
+              recipientUserId: userId,
+              channel: "EMAIL",
+              templateKey: "booking_reminder_family",
+              scheduledFor: reminderAt,
+            },
+            {
+              bookingId: booking.id,
+              recipientUserId: booking.teacher.userId,
+              channel: "EMAIL",
+              templateKey: "booking_reminder_teacher",
+              scheduledFor: reminderAt,
+            },
+          ],
+        });
+      }
+    } catch (remErr) {
+      console.error("reminder_create", remErr);
+    }
+
     revalidatePath("/students/bookings");
     revalidatePath("/students");
     revalidatePath("/admin/bookings");

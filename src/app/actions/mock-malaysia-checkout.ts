@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { createBillplzBill } from "@/lib/integrations/payments/billplz";
 import { getFamilyStudentIds } from "@/server/queries/family";
+import { completePackagePurchaseFromPendingPayment } from "@/server/payments/complete-package-purchase";
 import type { UserRole } from "@/lib/types";
 
 const startSchema = z.object({
@@ -14,8 +16,8 @@ const startSchema = z.object({
 });
 
 export type StartMockCheckoutState =
-  | { ok: true; paymentId: string; error: null }
-  | { ok: false; paymentId: null; error: string };
+  | { ok: true; paymentId: string; billPlzUrl: string | null; error: null }
+  | { ok: false; paymentId: null; billPlzUrl: null; error: string };
 
 export async function startMockMalaysiaPackageCheckoutAction(
   _prev: StartMockCheckoutState | undefined,
@@ -23,7 +25,7 @@ export async function startMockMalaysiaPackageCheckoutAction(
 ): Promise<StartMockCheckoutState> {
   const session = await auth();
   if (!session?.user?.id || !session.user.role) {
-    return { ok: false, paymentId: null, error: "Not signed in" };
+    return { ok: false, paymentId: null, billPlzUrl: null, error: "Not signed in" };
   }
 
   const parsed = startSchema.safeParse({
@@ -31,7 +33,7 @@ export async function startMockMalaysiaPackageCheckoutAction(
     packageId: formData.get("packageId"),
   });
   if (!parsed.success) {
-    return { ok: false, paymentId: null, error: "Invalid form" };
+    return { ok: false, paymentId: null, billPlzUrl: null, error: "Invalid form" };
   }
 
   const { studentId, packageId } = parsed.data;
@@ -39,17 +41,20 @@ export async function startMockMalaysiaPackageCheckoutAction(
   const role = session.user.role as UserRole;
   const allowed = await getFamilyStudentIds(userId, role);
   if (!allowed.includes(studentId)) {
-    return { ok: false, paymentId: null, error: "Student not in your account" };
+    return { ok: false, paymentId: null, billPlzUrl: null, error: "Student not in your account" };
   }
 
   const pkg = await prisma.package.findFirst({ where: { id: packageId, isActive: true } });
   if (!pkg) {
-    return { ok: false, paymentId: null, error: "Package not found" };
+    return { ok: false, paymentId: null, billPlzUrl: null, error: "Package not found" };
   }
 
-  const checkoutReference = `MOCK-MYR-${Date.now().toString(36).toUpperCase()}`;
+  const providerMode = process.env.PAYMENT_PROVIDER ?? "mock";
+  const useBillplz = providerMode === "billplz";
 
   try {
+    const checkoutRef = useBillplz ? `pending-${Date.now()}` : `MOCK-MYR-${Date.now().toString(36).toUpperCase()}`;
+
     const payment = await prisma.payment.create({
       data: {
         payerId: userId,
@@ -57,21 +62,57 @@ export async function startMockMalaysiaPackageCheckoutAction(
         status: PaymentStatus.PENDING,
         amount: pkg.price,
         currency: pkg.currency,
-        provider: "MANUAL",
-        checkoutReference,
-        metadata: {
-          mockGateway: "malaysia-fpx",
-          packageId: pkg.id,
-          packageName: pkg.name,
-        },
+        provider: useBillplz ? "BILLPLZ" : "MANUAL",
+        checkoutReference: checkoutRef,
+        metadata: useBillplz
+          ? { packageId: pkg.id, packageName: pkg.name }
+          : { mockGateway: "malaysia-fpx", packageId: pkg.id, packageName: pkg.name },
       },
     });
 
+    if (useBillplz) {
+      const payerEmail = session.user.email ?? "payer@demo.local";
+      const payerName = session.user.name ?? payerEmail;
+      const bill = await createBillplzBill({
+        title: pkg.name,
+        amountMYR: Number(pkg.price),
+        email: payerEmail,
+        name: payerName,
+        reference1: payment.id,
+      });
+      if (!bill.ok) {
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: PaymentStatus.FAILED,
+            metadata: {
+              ...((payment.metadata as Record<string, unknown> | null) ?? {}),
+              billplzError: bill.error,
+            },
+          },
+        });
+        return { ok: false, paymentId: null, billPlzUrl: null, error: bill.error };
+      }
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          checkoutReference: bill.billId,
+          providerReference: bill.billId,
+          metadata: {
+            ...((payment.metadata as Record<string, unknown> | null) ?? {}),
+            billplzBillId: bill.billId,
+          },
+        },
+      });
+      revalidatePath("/students/payments");
+      return { ok: true, paymentId: payment.id, billPlzUrl: bill.billUrl, error: null };
+    }
+
     revalidatePath("/students/payments");
-    return { ok: true, paymentId: payment.id, error: null };
+    return { ok: true, paymentId: payment.id, billPlzUrl: null, error: null };
   } catch (e) {
     console.error(e);
-    return { ok: false, paymentId: null, error: "Could not start checkout" };
+    return { ok: false, paymentId: null, billPlzUrl: null, error: "Could not start checkout" };
   }
 }
 
@@ -81,57 +122,17 @@ export async function finalizeMockMalaysiaPackagePaymentAction(paymentId: string
     return { ok: false as const, error: "Not signed in" };
   }
 
-  try {
-    await prisma.$transaction(async (tx) => {
-      const payment = await tx.payment.findUnique({ where: { id: paymentId } });
-      if (!payment || payment.payerId !== session.user!.id) throw new Error("Invalid payment");
-      if (payment.status === PaymentStatus.FAILED) {
-        throw new Error("aborted");
-      }
-      if (payment.status === PaymentStatus.PAID && payment.packagePurchaseId) {
-        return;
-      }
-      if (payment.status !== PaymentStatus.PENDING) throw new Error("Payment already closed");
-
-      const meta = payment.metadata as { packageId?: string } | null;
-      const packageId = meta?.packageId;
-      if (!packageId) throw new Error("Missing package on payment");
-
-      const pkg = await tx.package.findFirst({ where: { id: packageId, isActive: true } });
-      if (!pkg) throw new Error("Package unavailable");
-
-      const purchase = await tx.packagePurchase.create({
-        data: {
-          packageId: pkg.id,
-          studentId: payment.studentId,
-          purchasedById: payment.payerId,
-          status: "ACTIVE",
-          totalCredits: pkg.sessionCredits ?? 0,
-          usedCredits: 0,
-        },
-      });
-
-      await tx.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: PaymentStatus.PAID,
-          packagePurchaseId: purchase.id,
-          paidAt: new Date(),
-          providerReference: payment.checkoutReference ?? `fpx_ok_${payment.id}`,
-        },
-      });
-    });
-
-    revalidatePath("/students/payments");
-    revalidatePath("/students");
-    return { ok: true as const, error: null as string | null };
-  } catch (e) {
-    if (e instanceof Error && e.message === "aborted") {
+  const result = await completePackagePurchaseFromPendingPayment(paymentId, session.user.id);
+  if (!result.ok) {
+    if (result.error === "aborted") {
       return { ok: false as const, error: "aborted" as const };
     }
-    console.error(e);
-    return { ok: false as const, error: "Payment could not be completed" };
+    return { ok: false as const, error: result.error };
   }
+
+  revalidatePath("/students/payments");
+  revalidatePath("/students");
+  return { ok: true as const, error: null as string | null };
 }
 
 export async function failMockMalaysiaPackagePaymentAction(paymentId: string) {

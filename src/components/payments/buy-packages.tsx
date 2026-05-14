@@ -27,6 +27,10 @@ export function BuyPackagesSection({ packages, students }: Props) {
 
   useEffect(() => {
     if (!state?.ok || !state.paymentId) return;
+    if (state.billPlzUrl) {
+      window.location.assign(state.billPlzUrl);
+      return;
+    }
     router.push(`/checkout/mock/${state.paymentId}`);
   }, [state, router]);
 

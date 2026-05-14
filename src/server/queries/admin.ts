@@ -1,3 +1,4 @@
+import { BookingStatus } from "@prisma/client";
 import { addDays } from "date-fns";
 import { prisma } from "@/lib/db";
 import { formatDateTime, formatMYR } from "@/lib/format";
@@ -204,9 +205,16 @@ export async function getAdminTeachersDirectory(): Promise<{ rows: TableRow[]; d
   }
 }
 
-export async function getAdminBookingsTable(): Promise<{ rows: TableRow[]; dbError: boolean }> {
+export async function getAdminBookingsTable(
+  statusFilter?: string | null,
+): Promise<{ rows: TableRow[]; dbError: boolean }> {
   try {
+    const valid =
+      statusFilter != null && statusFilter !== "" && Object.values(BookingStatus).includes(statusFilter as BookingStatus);
+    const where = valid ? { status: statusFilter as BookingStatus } : {};
+
     const bookings = await prisma.booking.findMany({
+      where,
       orderBy: { scheduledStartAt: "desc" },
       take: 40,
       include: {
