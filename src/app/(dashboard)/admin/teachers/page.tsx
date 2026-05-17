@@ -14,7 +14,7 @@ export default async function AdminTeachersPage() {
         description="Teacher directory with capacity signals from assignments and availability rows."
       >
         {rows.length ? (
-          <DataTable columns={["Teacher", "Specialty", "Timezone", "Students", "Availability"]} rows={rows} />
+          <DataTable columns={["Teacher", "Specialty", "Timezone", "Students", "Availability", "Manage"]} rows={rows} />
         ) : (
           <p className="text-sm text-slate-500">No teachers yet. Run the database seed.</p>
         )}

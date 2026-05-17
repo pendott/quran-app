@@ -46,6 +46,12 @@ export default async function TeacherDashboardPage() {
             All classes
           </Link>
           <Link
+            href="/teacher/availability"
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+          >
+            My availability
+          </Link>
+          <Link
             href="/teacher/students"
             className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
           >

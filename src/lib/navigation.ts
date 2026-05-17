@@ -11,6 +11,7 @@ export const adminNavItems: NavItem[] = [
 export const teacherNavItems: NavItem[] = [
   { href: "/teacher", label: "Today", description: "Daily schedule and class actions" },
   { href: "/teacher/classes", label: "Classes", description: "Upcoming sessions and attendance" },
+  { href: "/teacher/availability", label: "Availability", description: "Weekly hours and monthly extra dates" },
   { href: "/teacher/students", label: "Students", description: "Assigned learners and history" },
 ];
 

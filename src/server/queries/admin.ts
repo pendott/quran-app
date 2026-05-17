@@ -1,5 +1,7 @@
 import { BookingStatus } from "@prisma/client";
 import { addDays } from "date-fns";
+import Link from "next/link";
+import { createElement } from "react";
 import { meetingJoinLinkCell } from "@/components/dashboard/meeting-join-link";
 import { prisma } from "@/lib/db";
 import { formatDateTime, formatMYR } from "@/lib/format";
@@ -205,7 +207,15 @@ export async function getAdminTeachersDirectory(): Promise<{ rows: TableRow[]; d
       Specialty: t.headline ?? t.bio?.slice(0, 48) ?? "—",
       Timezone: t.timezone,
       Students: String(t.assignments.length),
-      Availability: t.availabilities.length ? "Open" : "Not set",
+      Availability: t.availabilities.length ? `${t.availabilities.length} rule(s)` : "Not set",
+      Manage: createElement(
+        Link,
+        {
+          href: `/admin/teachers/${t.id}/availability`,
+          className: "font-medium text-teal-700 underline",
+        },
+        "Availability",
+      ),
     }));
 
     return { rows, dbError: false };
