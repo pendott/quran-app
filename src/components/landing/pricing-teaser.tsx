@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
+import { brandUi } from "@/lib/brand";
+import { cn } from "@/lib/utils";
 
 const tiers = [
   {
@@ -25,13 +27,13 @@ const tiers = [
 
 export function PricingTeaser() {
   return (
-    <section id="pricing" className="scroll-mt-24 border-t border-[#0d4f4f]/10 bg-white px-4 py-16 sm:px-6 sm:py-24">
+    <section id="pricing" className="scroll-mt-24 border-t border-slate-200/80 bg-white px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-6xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c5a059]">Simple pricing</p>
-        <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-[#0d4f4f] sm:text-4xl">
+        <p className={brandUi.sectionLabel}>Simple pricing</p>
+        <h2 className={cn("mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl", brandUi.heading)}>
           Learn at your own pace
         </h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-[#0d4f4f]/70">
+        <p className={cn("mt-4 max-w-2xl text-base leading-7", brandUi.body)}>
           Pay per class or choose a package — secure online payment when you book. No hidden fees, no confusion.
         </p>
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
@@ -40,17 +42,17 @@ export function PricingTeaser() {
               key={tier.name}
               className={`flex flex-col rounded-3xl border p-8 ${
                 tier.featured
-                  ? "border-[#c5a059]/50 bg-[#c5a059]/10 shadow-md shadow-[#0d4f4f]/5 ring-1 ring-[#c5a059]/30"
-                  : "border-[#0d4f4f]/10 bg-[#faf8f3]"
+                  ? "border-amber-300 bg-amber-50 shadow-md ring-1 ring-amber-200"
+                  : "border-slate-200 bg-[#faf8f3]"
               }`}
             >
-              <h3 className="text-lg font-semibold text-[#0d4f4f]">{tier.name}</h3>
-              <p className="mt-2 text-2xl font-semibold tracking-tight text-[#0d4f4f]">{tier.price}</p>
-              <p className="mt-2 text-sm leading-6 text-[#0d4f4f]/70">{tier.detail}</p>
-              <ul className="mt-6 flex-1 space-y-3 text-sm text-[#0d4f4f]/80">
+              <h3 className={cn("text-lg font-semibold", brandUi.heading)}>{tier.name}</h3>
+              <p className={cn("mt-2 text-2xl font-semibold tracking-tight", brandUi.heading)}>{tier.price}</p>
+              <p className={cn("mt-2 text-sm leading-6", brandUi.body)}>{tier.detail}</p>
+              <ul className={cn("mt-6 flex-1 space-y-3 text-sm", brandUi.body)}>
                 {tier.bullets.map((b) => (
                   <li key={b} className="flex gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#c5a059]" aria-hidden />
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#9a6b1a]" aria-hidden />
                     {b}
                   </li>
                 ))}
@@ -58,15 +60,12 @@ export function PricingTeaser() {
             </article>
           ))}
         </div>
-        <div className="mt-12 rounded-3xl bg-[#0d4f4f] px-8 py-10 text-center text-white sm:px-12">
+        <div className="mt-12 rounded-3xl bg-slate-900 px-8 py-10 text-center text-white sm:px-12">
           <h3 className="text-xl font-semibold sm:text-2xl">Ready to start reciting?</h3>
-          <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-white/80">
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-slate-300">
             Create your account, pick a teacher, and book your first class — learn Quran from anywhere today.
           </p>
-          <Link
-            href="/login?callbackUrl=%2Fstudents"
-            className="mt-6 inline-flex rounded-full bg-[#c5a059] px-6 py-3 text-sm font-semibold text-[#0d4f4f] shadow-lg transition hover:bg-[#d4b06a]"
-          >
+          <Link href="/login?callbackUrl=%2Fstudents" className={cn("mt-6", brandUi.btnOnDark)}>
             Get started free
           </Link>
         </div>

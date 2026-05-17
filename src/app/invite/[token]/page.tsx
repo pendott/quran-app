@@ -22,7 +22,7 @@ export default async function InvitePage({ params }: Props) {
     <div className="flex min-h-screen items-center justify-center bg-[#faf8f3] px-4 py-12">
       <div className="w-full max-w-md rounded-[32px] border border-[#0d4f4f]/10 bg-white p-8 shadow-xl">
         <Logo variant="full" surface="cream" href="/" className="mx-auto max-w-[200px]" />
-        <h1 className="mt-6 text-center text-xl font-semibold text-[#0d4f4f]">Join {APP_NAME}</h1>
+        <h1 className="mt-6 text-center text-xl font-semibold text-slate-900">Join {APP_NAME}</h1>
         <p className="mt-2 text-sm text-slate-600">
           Set your password for <strong>{user.email}</strong> and add your child&apos;s name.
         </p>

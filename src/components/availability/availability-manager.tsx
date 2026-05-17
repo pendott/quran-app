@@ -152,7 +152,7 @@ export function AvailabilityManager({
           <button
             type="submit"
             disabled={recurringPending}
-            className="sm:col-span-2 rounded-full bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50"
+            className="sm:col-span-2 btn-primary disabled:opacity-50"
           >
             {recurringPending ? "Adding…" : "Add weekly hours"}
           </button>

@@ -51,7 +51,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       <section className="rounded-[36px] border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-950/5 md:p-10">
         <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Sign in</p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#0d4f4f]">{APP_NAME}</h2>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{APP_NAME}</h2>
         <p className="mt-4 text-sm leading-7 text-slate-600">
           Default redirect after login is the family portal unless <code className="text-xs">callbackUrl</code> is set
           (for example from the marketing site). Current callback:{" "}

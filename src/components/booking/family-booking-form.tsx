@@ -172,7 +172,7 @@ export function FamilyBookingForm({ teachers, students, billplzEnabled }: Props)
         <button
           type="submit"
           disabled={isPending || !slots.length}
-          className="rounded-full bg-teal-600 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50"
+          className="btn-primary px-5 py-3 disabled:opacity-50"
         >
           {isPending
             ? "Processing…"

@@ -40,7 +40,7 @@ export function CreateFamilyForm() {
       <button
         type="submit"
         disabled={pending}
-        className="sm:col-span-2 rounded-full bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50"
+        className="sm:col-span-2 btn-primary disabled:opacity-50"
       >
         {pending ? "Creating…" : "Create parent + student"}
       </button>

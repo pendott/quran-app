@@ -81,7 +81,7 @@ export function BuyPackagesSection({ packages, students, billplzEnabled }: Props
             <button
               type="submit"
               disabled={pending}
-              className="mt-auto rounded-full bg-teal-600 py-2 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50"
+              className="mt-auto btn-primary w-full py-2 disabled:opacity-50"
             >
               {pending
                 ? "Starting checkout…"

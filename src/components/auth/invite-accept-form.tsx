@@ -41,7 +41,7 @@ export function InviteAcceptForm({ token, defaultName }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-full bg-teal-600 py-3 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50"
+        className="w-full btn-primary py-3 disabled:opacity-50"
       >
         {pending ? "Creating account…" : "Create account"}
       </button>

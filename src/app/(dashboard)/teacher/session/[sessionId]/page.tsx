@@ -82,7 +82,7 @@ export default async function TeacherSessionPage({ params }: Props) {
             <input type="hidden" name="sessionId" value={sessionId} />
             <button
               type="submit"
-              className="rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500"
+              className="btn-primary px-4 py-2"
             >
               Mark complete
             </button>

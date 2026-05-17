@@ -1,4 +1,6 @@
 import { BookOpen, Calendar, MapPin, Video } from "lucide-react";
+import { brandUi } from "@/lib/brand";
+import { cn } from "@/lib/utils";
 
 const items = [
   {
@@ -25,13 +27,13 @@ const items = [
 
 export function Features() {
   return (
-    <section id="features" className="scroll-mt-24 border-t border-[#0d4f4f]/10 bg-white px-4 py-16 sm:px-6 sm:py-24">
+    <section id="features" className="scroll-mt-24 border-t border-slate-200/80 bg-white px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-6xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c5a059]">Why jomngaji.my</p>
-        <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-[#0d4f4f] sm:text-4xl">
+        <p className={brandUi.sectionLabel}>Why jomngaji.my</p>
+        <h2 className={cn("mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl", brandUi.heading)}>
           Everything you need to learn Quran online
         </h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-[#0d4f4f]/70">
+        <p className={cn("mt-4 max-w-2xl text-base leading-7", brandUi.body)}>
           Whether you are starting tajwid, strengthening recitation, or memorising — connect with teachers and stay on
           track without leaving home.
         </p>
@@ -39,13 +41,13 @@ export function Features() {
           {items.map(({ icon: Icon, title, body }) => (
             <article
               key={title}
-              className="rounded-2xl border border-[#0d4f4f]/10 bg-[#faf8f3] p-6 shadow-sm transition hover:border-[#c5a059]/40 hover:shadow-md"
+              className="rounded-2xl border border-slate-200 bg-[#faf8f3] p-6 shadow-sm transition hover:border-amber-200 hover:shadow-md"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0d4f4f] text-white">
+              <div className={cn(brandUi.iconBox, "h-10 w-10")}>
                 <Icon className="h-5 w-5" aria-hidden />
               </div>
-              <h3 className="mt-4 text-base font-semibold text-[#0d4f4f]">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-[#0d4f4f]/70">{body}</p>
+              <h3 className={cn("mt-4 text-base font-semibold", brandUi.heading)}>{title}</h3>
+              <p className={cn("mt-2 text-sm leading-6", brandUi.body)}>{body}</p>
             </article>
           ))}
         </div>
