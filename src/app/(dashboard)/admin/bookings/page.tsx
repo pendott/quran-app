@@ -3,6 +3,8 @@ import { BookingStatus, type Prisma } from "@prisma/client";
 import { DbBanner } from "@/components/dashboard/db-banner";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { AdminCancelBookingButton } from "@/components/admin/admin-cancel-booking-button";
+import { AdminCreateBookingForm } from "@/components/admin/admin-create-booking-form";
+import { getAdminBookingFormOptions } from "@/server/queries/admin-booking";
 import { formatDateTime } from "@/lib/format";
 import { prisma } from "@/lib/db";
 
@@ -26,6 +28,7 @@ type Props = { searchParams: Promise<{ status?: string }> };
 
 export default async function AdminBookingsPage({ searchParams }: Props) {
   const { status } = await searchParams;
+  const { students, teachers, dbError: pickerError } = await getAdminBookingFormOptions();
   const valid =
     status != null && status !== "" && Object.values(BookingStatus).includes(status as BookingStatus);
   const where = valid ? { status: status as BookingStatus } : {};
@@ -46,7 +49,15 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
   return (
     <div className="space-y-4">
       {dbError ? <DbBanner message="Database unavailable." /> : null}
-      <SectionCard title="Booking operations" description="Filter, review, and cancel reservations.">
+      <SectionCard title="Add booking manually" description="Schedule a class for any student and teacher. Confirmed bookings create a class session and reminders.">
+        {pickerError ? (
+          <p className="text-sm text-slate-500">Could not load students or teachers.</p>
+        ) : (
+          <AdminCreateBookingForm students={students} teachers={teachers} />
+        )}
+      </SectionCard>
+
+      <SectionCard title="Booking operations" description="Filter, review, edit, and cancel reservations.">
         <div className="mb-4 flex flex-wrap gap-2">
           {filters.map((f) => {
             const active = (status ?? "") === f.value;
@@ -90,7 +101,15 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
                     </td>
                     <td className="px-4 py-3">{b.status.replace(/_/g, " ")}</td>
                     <td className="px-4 py-3">
-                      {b.status !== "CANCELLED" ? <AdminCancelBookingButton bookingId={b.id} /> : "—"}
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          href={`/admin/bookings/${b.id}/edit`}
+                          className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-800 hover:bg-slate-50"
+                        >
+                          Edit
+                        </Link>
+                        {b.status !== "CANCELLED" ? <AdminCancelBookingButton bookingId={b.id} /> : null}
+                      </div>
                     </td>
                   </tr>
                 ))}
