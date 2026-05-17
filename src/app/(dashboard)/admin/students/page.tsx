@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { Plus, Search, Users } from "lucide-react";
+import { Search } from "lucide-react";
+import { CreateFamilyForm } from "@/components/admin/create-family-form";
+import { InviteParentForm } from "@/components/admin/invite-parent-form";
 import { DbBanner } from "@/components/dashboard/db-banner";
 import { DataTable } from "@/components/dashboard/data-table";
 import { SectionCard } from "@/components/dashboard/section-card";
@@ -21,6 +23,22 @@ export default async function AdminStudentsPage() {
       </section>
 
       <SectionCard
+        title="Onboard a family"
+        description="Create accounts directly or send an invite link (no public registration required for pilot)."
+      >
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div>
+            <h3 className="mb-3 text-sm font-semibold text-slate-900">Create parent + student</h3>
+            <CreateFamilyForm />
+          </div>
+          <div>
+            <h3 className="mb-3 text-sm font-semibold text-slate-900">Invite by email</h3>
+            <InviteParentForm />
+          </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard
         title="Student roster"
         description="Learner profiles, parent links, assigned teachers, and progress checkpoints."
       >
@@ -34,22 +52,12 @@ export default async function AdminStudentsPage() {
               aria-label="Search students"
             />
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50"
-            >
-              <Users className="h-4 w-4" aria-hidden />
-              Export CSV
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-500"
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              Add student
-            </button>
-          </div>
+          <Link
+            href="/api/admin/reports/payments-export"
+            className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50"
+          >
+            Export payments CSV
+          </Link>
         </div>
 
         {rows.length ? (

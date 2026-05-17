@@ -1,8 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { addWeeks, startOfWeek } from "date-fns";
-import { createFamilyBookingAction, getBookingSlotsAction } from "@/app/actions/booking";
+import { createFamilyBookingAction, getBookingSlotsAction, type CreateBookingState } from "@/app/actions/booking";
 import { formatDateTime } from "@/lib/format";
 
 export type BookingTeacherOption = { id: string; name: string };
@@ -10,16 +11,23 @@ export type BookingStudentOption = { id: string; displayName: string };
 
 type Slot = { start: string; end: string };
 
+const initialState: CreateBookingState = {
+  ok: false,
+  error: " ",
+  paymentId: null,
+  billPlzUrl: null,
+  needsPayment: false,
+};
+
 type Props = {
   teachers: BookingTeacherOption[];
   students: BookingStudentOption[];
+  billplzEnabled?: boolean;
 };
 
-export function FamilyBookingForm({ teachers, students }: Props) {
-  const [state, formAction, isPending] = useActionState(createFamilyBookingAction, {
-    ok: false,
-    error: null as string | null,
-  });
+export function FamilyBookingForm({ teachers, students, billplzEnabled }: Props) {
+  const router = useRouter();
+  const [state, formAction, isPending] = useActionState(createFamilyBookingAction, initialState);
 
   const [teacherId, setTeacherId] = useState(teachers[0]?.id ?? "");
   const [weekOffset, setWeekOffset] = useState(0);
@@ -30,6 +38,19 @@ export function FamilyBookingForm({ teachers, students }: Props) {
     const base = startOfWeek(new Date(), { weekStartsOn: 1 });
     return addWeeks(base, weekOffset);
   }, [weekOffset]);
+
+  useEffect(() => {
+    if (!state?.ok) return;
+    if (state.billPlzUrl) {
+      window.location.assign(state.billPlzUrl);
+      return;
+    }
+    if (state.needsPayment && state.paymentId) {
+      router.push(`/checkout/mock/${state.paymentId}`);
+      return;
+    }
+    router.refresh();
+  }, [state, router]);
 
   useEffect(() => {
     if (!teacherId) return;
@@ -50,20 +71,23 @@ export function FamilyBookingForm({ teachers, students }: Props) {
   if (!teachers.length || !students.length) {
     return (
       <p className="text-sm text-slate-600">
-        No teachers accepting bookings or no students linked to this account. Run the seed and sign in as a parent.
+        No teachers accepting bookings or no students linked to this account. Ask your school admin to link a student.
       </p>
     );
   }
 
+  const showSuccess = state?.ok && !state.needsPayment;
+  const err = state && !state.ok && state.error?.trim() ? state.error : null;
+
   return (
     <div className="space-y-4">
-      {state?.ok ? (
+      {showSuccess ? (
         <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Booking created. Refresh the list below if it does not update automatically.
+          Booking confirmed with package credit.
         </p>
       ) : null}
-      {state && "error" in state && state.error ? (
-        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{state.error}</p>
+      {err ? (
+        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{err}</p>
       ) : null}
 
       <form action={formAction} className="space-y-4">
@@ -150,7 +174,11 @@ export function FamilyBookingForm({ teachers, students }: Props) {
           disabled={isPending || !slots.length}
           className="rounded-full bg-teal-600 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50"
         >
-          {isPending ? "Booking…" : "Confirm booking"}
+          {isPending
+            ? "Processing…"
+            : billplzEnabled
+              ? "Book & pay with FPX (Billplz)"
+              : "Book class (pay in checkout)"}
         </button>
       </form>
     </div>

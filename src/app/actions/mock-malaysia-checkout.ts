@@ -7,7 +7,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { createBillplzBill } from "@/lib/integrations/payments/billplz";
 import { getFamilyStudentIds } from "@/server/queries/family";
-import { completePackagePurchaseFromPendingPayment } from "@/server/payments/complete-package-purchase";
+import { completePendingPayment } from "@/server/payments/complete-pending-payment";
 import type { UserRole } from "@/lib/types";
 
 const startSchema = z.object({
@@ -122,7 +122,7 @@ export async function finalizeMockMalaysiaPackagePaymentAction(paymentId: string
     return { ok: false as const, error: "Not signed in" };
   }
 
-  const result = await completePackagePurchaseFromPendingPayment(paymentId, session.user.id);
+  const result = await completePendingPayment(paymentId, session.user.id);
   if (!result.ok) {
     if (result.error === "aborted") {
       return { ok: false as const, error: "aborted" as const };

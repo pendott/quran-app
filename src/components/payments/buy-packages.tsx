@@ -19,9 +19,10 @@ type Pkg = {
 type Props = {
   packages: Pkg[];
   students: BookingStudentOption[];
+  billplzEnabled?: boolean;
 };
 
-export function BuyPackagesSection({ packages, students }: Props) {
+export function BuyPackagesSection({ packages, students, billplzEnabled }: Props) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(startMockMalaysiaPackageCheckoutAction, undefined);
 
@@ -45,8 +46,10 @@ export function BuyPackagesSection({ packages, students }: Props) {
       <h3 className="text-sm font-semibold text-slate-900">Buy a package</h3>
       <p className="text-xs leading-relaxed text-slate-500">
         Credits attach to the student you select. Parents choose a linked child; a student account only sees themselves.
-        The payer is always whoever is signed in. You will go through a <strong>mock Malaysia-style</strong> checkout
-        (review → FPX / card / eWallet → processing) before credits are added.
+        The payer is always whoever is signed in.{" "}
+        {billplzEnabled
+          ? "You will be redirected to Billplz (FPX) to complete payment."
+          : "You will go through a mock Malaysia-style checkout (review → FPX / card / eWallet → processing) before credits are added."}
       </p>
       {err ? (
         <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{err}</p>
@@ -80,7 +83,11 @@ export function BuyPackagesSection({ packages, students }: Props) {
               disabled={pending}
               className="mt-auto rounded-full bg-teal-600 py-2 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50"
             >
-              {pending ? "Starting checkout…" : "Pay with mock Malaysia gateway (demo)"}
+              {pending
+                ? "Starting checkout…"
+                : billplzEnabled
+                  ? "Pay with FPX (Billplz)"
+                  : "Pay with mock Malaysia gateway (demo)"}
             </button>
           </form>
         ))}

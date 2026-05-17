@@ -121,6 +121,8 @@ model User {
   status         UserStatus      @default(ACTIVE)
   timezone       String          @default("Asia/Kuala_Lumpur")
   emailVerified  DateTime?
+  inviteToken    String?         @unique
+  inviteExpiresAt DateTime?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   teacherProfile Teacher?        @relation("TeacherUser")

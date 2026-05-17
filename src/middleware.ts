@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { getDashboardHomeForRole } from "@/lib/navigation";
+import type { UserRole } from "@/lib/types";
 
 const protectedMatchers = [/^\/admin(\/|$)/, /^\/teacher(\/|$)/, /^\/students(\/|$)/, /^\/checkout(\/|$)/];
 
 function isProtectedPath(pathname: string) {
   return protectedMatchers.some((re) => re.test(pathname));
+}
+
+function roleMayAccessPath(role: UserRole, pathname: string) {
+  if (pathname.startsWith("/admin")) return role === "ADMIN";
+  if (pathname.startsWith("/teacher")) return role === "TEACHER";
+  if (pathname.startsWith("/students")) return role === "PARENT" || role === "STUDENT";
+  if (pathname.startsWith("/checkout")) return true;
+  return true;
 }
 
 export async function middleware(request: NextRequest) {
@@ -29,6 +39,11 @@ export async function middleware(request: NextRequest) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(loginUrl);
+  }
+
+  const role = (token.role as UserRole | undefined) ?? "STUDENT";
+  if (!roleMayAccessPath(role, request.nextUrl.pathname)) {
+    return NextResponse.redirect(new URL(getDashboardHomeForRole(role), request.url));
   }
 
   return NextResponse.next();

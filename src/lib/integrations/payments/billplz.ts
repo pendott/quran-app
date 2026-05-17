@@ -13,6 +13,8 @@ export async function createBillplzBill(input: {
   name: string;
   /** Shown in Billplz dashboard; use internal payment id for correlation. */
   reference1: string;
+  /** Where Billplz sends the payer after payment (defaults to /students/payments?paid=1). */
+  redirectPath?: string;
 }): Promise<BillplzCreateBillResult> {
   const apiKey = process.env.BILLPLZ_API_KEY;
   const collectionId = process.env.BILLPLZ_COLLECTION_ID;
@@ -26,7 +28,8 @@ export async function createBillplzBill(input: {
 
   const callbackBase = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
   const callbackUrl = `${callbackBase.replace(/\/$/, "")}/api/webhooks/payment/notify`;
-  const redirectUrl = `${callbackBase.replace(/\/$/, "")}/students/payments`;
+  const redirectPath = input.redirectPath ?? "/students/payments?paid=1";
+  const redirectUrl = `${callbackBase.replace(/\/$/, "")}${redirectPath.startsWith("/") ? redirectPath : `/${redirectPath}`}`;
 
   const amountSen = Math.round(Number(input.amountMYR) * 100);
   if (!Number.isFinite(amountSen) || amountSen < 1) {
