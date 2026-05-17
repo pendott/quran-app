@@ -1,6 +1,6 @@
 "use server";
 
-import { AttendanceStatus, SessionStatus } from "@prisma/client";
+import { AttendanceStatus, BookingStatus, SessionStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
@@ -43,15 +43,28 @@ export async function completeClassSessionAction(formData: FormData): Promise<vo
   if (!session?.user?.id || !classSessionId) return;
   try {
     await assertTeacherOwnsSession(session.user.id, classSessionId);
-    await prisma.classSession.update({
+    const cs = await prisma.classSession.findUnique({
       where: { id: classSessionId },
-      data: {
-        status: SessionStatus.COMPLETED,
-        actualEndAt: new Date(),
-        completedAt: new Date(),
-        studentAttendance: AttendanceStatus.PRESENT,
-        teacherAttendance: AttendanceStatus.PRESENT,
-      },
+      select: { bookingId: true },
+    });
+    const completedAt = new Date();
+    await prisma.$transaction(async (tx) => {
+      await tx.classSession.update({
+        where: { id: classSessionId },
+        data: {
+          status: SessionStatus.COMPLETED,
+          actualEndAt: completedAt,
+          completedAt,
+          studentAttendance: AttendanceStatus.PRESENT,
+          teacherAttendance: AttendanceStatus.PRESENT,
+        },
+      });
+      if (cs?.bookingId) {
+        await tx.booking.updateMany({
+          where: { id: cs.bookingId, status: BookingStatus.CONFIRMED },
+          data: { status: BookingStatus.COMPLETED },
+        });
+      }
     });
     revalidatePath("/teacher/classes");
     revalidatePath(`/teacher/session/${classSessionId}`);

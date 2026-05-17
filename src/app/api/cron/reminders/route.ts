@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { dispatchDueReminders } from "@/lib/integrations/reminders/dispatch";
+import { autoCompletePastSessions } from "@/server/booking/auto-complete-past-sessions";
 
 function authorize(req: Request) {
   const secret = process.env.CRON_SECRET;
@@ -14,8 +15,11 @@ export async function GET(req: Request) {
   if (!authorize(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const result = await dispatchDueReminders();
-  return NextResponse.json(result);
+  const [reminders, sessions] = await Promise.all([
+    dispatchDueReminders(),
+    autoCompletePastSessions(),
+  ]);
+  return NextResponse.json({ reminders, sessions });
 }
 
 export const POST = GET;
