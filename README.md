@@ -71,7 +71,21 @@ Must contain `@postgres:5432`, **not** `@localhost:5432`. If it shows `localhost
 docker compose logs web --tail 30
 ```
 
-**4. Nuclear reset** (wipes all DB data)
+**4. Login works but no dashboard (blank or homepage)**
+
+Docker serves HTTP with `NODE_ENV=production`. Set `AUTH_URL` in `.env` to the **exact URL in your browser** (not only `localhost` if you use an IP or hostname):
+
+```bash
+# Example: you open http://192.168.1.10:3000
+AUTH_URL=http://192.168.1.10:3000
+AUTH_SECRET=dev-secret-at-least-32-characters-long
+
+docker compose up -d --build --force-recreate web
+```
+
+Then sign in again — you should land on `/admin`, `/teacher`, or `/students` with the sidebar visible.
+
+**5. Nuclear reset** (wipes all DB data)
 
 ```bash
 ./scripts/docker-reset.sh

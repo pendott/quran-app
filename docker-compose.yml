@@ -10,7 +10,8 @@ services:
     environment:
       # Inside Compose, Postgres hostname is `postgres` (not localhost).
       DATABASE_URL: postgresql://quran:quran_dev_password@postgres:5432/quran_class_saas?schema=public
-      AUTH_URL: http://localhost:3000
+      # Must match how you open the app in the browser (http://IP:3000 or http://hostname:3000).
+      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
       # Required for NextAuth JWT — use .env to override in production.
       AUTH_SECRET: ${AUTH_SECRET:-dev-secret-at-least-32-characters-long}
     depends_on:

@@ -1,13 +1,12 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
 import { resolvePostLoginPath } from "@/lib/navigation";
 import type { UserRole } from "@/lib/types";
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const [email, setEmail] = useState("");
@@ -30,11 +29,17 @@ export function LoginForm() {
       setError("Invalid email or password.");
       return;
     }
-    const session = await getSession();
+
+    let session = await getSession();
+    if (!session?.user?.role) {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      session = await getSession();
+    }
+
     const role = (session?.user?.role as UserRole | undefined) ?? "STUDENT";
     const next = resolvePostLoginPath(callbackUrl, role);
-    router.push(next);
-    router.refresh();
+    // Full page load so middleware and server layouts see the session cookie.
+    window.location.assign(next);
   }
 
   return (

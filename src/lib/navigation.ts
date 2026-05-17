@@ -51,7 +51,7 @@ function isSafeRelativeAppPath(path: string) {
  */
 export function resolvePostLoginPath(callbackUrl: string, role: UserRole) {
   const trimmed = callbackUrl.trim() || "/";
-  if (!isSafeRelativeAppPath(trimmed)) {
+  if (!isSafeRelativeAppPath(trimmed) || trimmed === "/") {
     return getDashboardHomeForRole(role);
   }
   if (

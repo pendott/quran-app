@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { shouldUseSecureAuthCookies } from "@/lib/auth-cookies";
 import { getDashboardHomeForRole } from "@/lib/navigation";
 import type { UserRole } from "@/lib/types";
 
@@ -32,7 +33,7 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret,
-    secureCookie: process.env.NODE_ENV === "production",
+    secureCookie: shouldUseSecureAuthCookies(),
   });
 
   if (!token?.sub) {
