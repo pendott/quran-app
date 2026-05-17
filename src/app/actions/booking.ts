@@ -8,6 +8,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { isBillplzEnabled } from "@/lib/payments/provider";
 import { getAvailableSlots } from "@/server/booking/availability";
+import { resolveMeetingLinkForClass } from "@/lib/integrations/zoom/resolve-meeting-link";
 import { attachBillplzToPendingPayment } from "@/server/payments/start-billplz-checkout";
 import { getFamilyStudentIds } from "@/server/queries/family";
 import type { UserRole } from "@/lib/types";
@@ -131,11 +132,20 @@ export async function createFamilyBookingAction(
           },
         });
 
+        const meetingLink = await resolveMeetingLinkForClass({
+          topic: `Class · ${student?.displayName ?? "Student"}`,
+          scheduledStartAt: slotStartDate,
+          scheduledEndAt: slotEndDate,
+          fallbackSessionKey: classSession.id,
+        });
+
         await tx.meetingLink.create({
           data: {
             classSessionId: classSession.id,
-            provider: "MANUAL",
-            joinUrl: `https://meet.quran-class.local/${classSession.id}`,
+            provider: meetingLink.provider,
+            joinUrl: meetingLink.joinUrl,
+            externalMeetingId: meetingLink.externalMeetingId,
+            metadata: meetingLink.metadata,
           },
         });
 

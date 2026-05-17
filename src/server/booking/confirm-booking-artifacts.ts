@@ -1,15 +1,19 @@
 import type { Booking, Prisma } from "@prisma/client";
 import { BookingStatus, SessionStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { createZoomMeetingStub } from "@/lib/integrations/zoom/stub";
+import { resolveMeetingLinkForClass } from "@/lib/integrations/zoom/resolve-meeting-link";
 
 type Tx = Prisma.TransactionClient;
 
 export async function ensureClassSessionAndMeeting(
   tx: Tx,
   booking: Pick<Booking, "id" | "studentId" | "teacherId" | "scheduledStartAt" | "scheduledEndAt">,
+  options?: { meetingTopic?: string },
 ) {
-  const existing = await tx.classSession.findUnique({ where: { bookingId: booking.id } });
+  const existing = await tx.classSession.findUnique({
+    where: { bookingId: booking.id },
+    include: { meetingLink: true },
+  });
   if (existing) {
     await tx.classSession.update({
       where: { id: existing.id },
@@ -34,16 +38,20 @@ export async function ensureClassSessionAndMeeting(
     },
   });
 
-  const useZoomStub = process.env.ZOOM_USE_STUB === "1";
-  const zoomStub = useZoomStub ? createZoomMeetingStub(`Class ${classSession.id}`) : null;
+  const link = await resolveMeetingLinkForClass({
+    topic: options?.meetingTopic ?? `Quran class · ${booking.id.slice(0, 8)}`,
+    scheduledStartAt: booking.scheduledStartAt,
+    scheduledEndAt: booking.scheduledEndAt,
+    fallbackSessionKey: classSession.id,
+  });
 
   await tx.meetingLink.create({
     data: {
       classSessionId: classSession.id,
-      provider: zoomStub ? "ZOOM" : "MANUAL",
-      joinUrl: zoomStub?.joinUrl ?? `https://meet.quran-class.local/${classSession.id}`,
-      externalMeetingId: zoomStub?.meetingId ?? null,
-      metadata: zoomStub ? { stub: true } : undefined,
+      provider: link.provider,
+      joinUrl: link.joinUrl,
+      externalMeetingId: link.externalMeetingId,
+      metadata: link.metadata,
     },
   });
 

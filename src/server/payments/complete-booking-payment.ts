@@ -1,6 +1,6 @@
 import { BookingStatus, PaymentStatus, SessionStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { createZoomMeetingStub } from "@/lib/integrations/zoom/stub";
+import { resolveMeetingLinkForClass } from "@/lib/integrations/zoom/resolve-meeting-link";
 
 /**
  * After Billplz/mock payment for a per-session booking: confirm booking and create class session.
@@ -55,16 +55,20 @@ export async function completeBookingPaymentFromPendingPayment(
           },
         });
 
-        const useZoomStub = process.env.ZOOM_USE_STUB === "1";
-        const zoomStub = useZoomStub ? createZoomMeetingStub(`Class ${classSession.id}`) : null;
+        const link = await resolveMeetingLinkForClass({
+          topic: `Quran class · ${booking.id.slice(0, 8)}`,
+          scheduledStartAt: booking.scheduledStartAt,
+          scheduledEndAt: booking.scheduledEndAt,
+          fallbackSessionKey: classSession.id,
+        });
 
         await db.meetingLink.create({
           data: {
             classSessionId: classSession.id,
-            provider: zoomStub ? "ZOOM" : "MANUAL",
-            joinUrl: zoomStub?.joinUrl ?? `https://meet.quran-class.local/${classSession.id}`,
-            externalMeetingId: zoomStub?.meetingId ?? null,
-            metadata: zoomStub ? { stub: true } : undefined,
+            provider: link.provider,
+            joinUrl: link.joinUrl,
+            externalMeetingId: link.externalMeetingId,
+            metadata: link.metadata,
           },
         });
 
