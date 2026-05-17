@@ -78,6 +78,7 @@ export async function adminCreateFamilyAction(_prev: unknown, formData: FormData
       });
     });
     revalidatePath("/admin/students");
+    revalidatePath("/admin/parents");
     return { ok: true as const, error: null as string | null };
   } catch (e) {
     console.error(e);
@@ -120,6 +121,7 @@ export async function adminCreateInviteAction(_prev: unknown, formData: FormData
   const base = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
   const inviteUrl = `${base.replace(/\/$/, "")}/invite/${token}`;
   revalidatePath("/admin/students");
+  revalidatePath("/admin/parents");
   return { ok: true as const, error: null, inviteUrl };
 }
 

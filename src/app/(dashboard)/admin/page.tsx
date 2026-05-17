@@ -6,8 +6,9 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { getAdminDashboardData } from "@/server/queries/admin";
 
 const quickLinks = [
-  { href: "/admin/students", label: "Students", detail: "Roster, parents, assignments" },
-  { href: "/admin/teachers", label: "Teachers", detail: "Profiles and availability" },
+  { href: "/admin/parents", label: "Parents", detail: "Accounts, invites, linked children" },
+  { href: "/admin/students", label: "Students", detail: "Profiles, teachers, progress" },
+  { href: "/admin/teachers", label: "Teachers", detail: "Create profiles and availability" },
   { href: "/admin/bookings", label: "Bookings", detail: "Schedule and status" },
   { href: "/admin/payments", label: "Payments", detail: "Gateway and refunds" },
   { href: "/api/admin/reports/export", label: "Export bookings (CSV)", detail: "Download last 500 bookings" },

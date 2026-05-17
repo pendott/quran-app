@@ -2,8 +2,9 @@ import type { NavItem, UserRole } from "@/lib/types";
 
 export const adminNavItems: NavItem[] = [
   { href: "/admin", label: "Overview", description: "KPIs, upcoming classes, revenue" },
-  { href: "/admin/teachers", label: "Teachers", description: "Profiles, assignments, availability" },
-  { href: "/admin/students", label: "Students", description: "Student records and parent links" },
+  { href: "/admin/teachers", label: "Teachers", description: "Create profiles, availability, assignments" },
+  { href: "/admin/parents", label: "Parents", description: "Parent accounts and family onboarding" },
+  { href: "/admin/students", label: "Students", description: "Learner profiles, teachers, progress" },
   { href: "/admin/bookings", label: "Bookings", description: "Session flow, reschedules, status" },
   { href: "/admin/payments", label: "Payments", description: "Invoices, package usage, settlement" },
 ];

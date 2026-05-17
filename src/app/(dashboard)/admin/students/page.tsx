@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { CreateFamilyForm } from "@/components/admin/create-family-form";
-import { InviteParentForm } from "@/components/admin/invite-parent-form";
 import { DbBanner } from "@/components/dashboard/db-banner";
 import { DataTable } from "@/components/dashboard/data-table";
 import { SectionCard } from "@/components/dashboard/section-card";
@@ -21,22 +19,6 @@ export default async function AdminStudentsPage() {
           <StatCard key={stat.label} {...stat} />
         ))}
       </section>
-
-      <SectionCard
-        title="Onboard a family"
-        description="Create accounts directly or send an invite link (no public registration required for pilot)."
-      >
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-slate-900">Create parent + student</h3>
-            <CreateFamilyForm />
-          </div>
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-slate-900">Invite by email</h3>
-            <InviteParentForm />
-          </div>
-        </div>
-      </SectionCard>
 
       <SectionCard
         title="Student roster"
@@ -61,14 +43,16 @@ export default async function AdminStudentsPage() {
         </div>
 
         {rows.length ? (
-          <DataTable columns={["Student", "Parent", "Teacher", "Progress", "Status"]} rows={rows} />
+          <DataTable columns={["Student", "Parent", "Teacher", "Progress", "Status", "Manage"]} rows={rows} />
         ) : (
           <p className="text-sm text-slate-500">No students yet. Run the database seed.</p>
         )}
 
         <p className="mt-5 text-sm leading-6 text-slate-500">
-          Demo accounts: <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">admin@demo.local</code>,{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">parent@demo.local</code>.{" "}
+          <Link href="/admin/parents" className="font-medium text-teal-700 hover:underline">
+            Manage parents
+          </Link>
+          {" · "}
           <Link href="/admin/teachers" className="font-medium text-teal-700 hover:underline">
             Manage teachers
           </Link>
