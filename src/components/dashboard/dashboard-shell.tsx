@@ -33,7 +33,7 @@ export function DashboardShell({
       <div className="mx-auto grid min-h-screen max-w-[1600px] gap-6 px-4 py-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-6">
         <aside className="rounded-[32px] border border-[#0d4f4f]/20 bg-[#0d4f4f] p-6 text-white shadow-xl shadow-[#0d4f4f]/20">
           <Link href="/" className="block">
-            <Logo variant="full" className="max-w-[160px] brightness-0 invert" />
+            <Logo variant="full" surface="pill" className="max-w-[160px]" />
           </Link>
 
           <div className="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-4">

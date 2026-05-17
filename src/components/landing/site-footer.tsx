@@ -7,9 +7,7 @@ export function SiteFooter() {
     <footer className="border-t border-[#0d4f4f]/10 bg-[#0d4f4f] text-white">
       <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-12 sm:px-6 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="inline-block rounded-2xl bg-white p-3">
-            <Logo variant="full" href="/" className="max-w-[140px]" />
-          </div>
+          <Logo variant="full" surface="pill" href="/" className="max-w-[140px]" />
           <p className="mt-4 max-w-xs text-sm leading-6 text-white/75">{APP_TAGLINE}</p>
         </div>
         <div className="flex flex-wrap gap-10 text-sm">

@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Globe, Headphones, Video } from "lucide-react";
+import { Logo } from "@/components/brand/logo";
 import { APP_TAGLINE } from "@/lib/brand";
 
 export function Hero() {
@@ -51,18 +51,14 @@ export function Hero() {
           </ul>
         </div>
 
-        <div className="relative mx-auto w-full max-w-md lg:max-w-none lg:justify-self-end">
-          <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-[#c5a059]/20 via-transparent to-[#0d4f4f]/10 blur-2xl" aria-hidden />
-          <div className="relative overflow-hidden rounded-[2rem] border border-[#0d4f4f]/10 bg-white p-6 shadow-xl shadow-[#0d4f4f]/10 sm:p-8">
-            <Image
-              src="/logo.png"
-              alt="jomngaji.my"
-              width={480}
-              height={480}
-              className="mx-auto h-auto w-full max-w-[320px] object-contain sm:max-w-[380px]"
-              priority
-            />
-            <p className="mt-6 text-center text-sm font-medium uppercase tracking-[0.2em] text-[#0d4f4f]/60">
+        <div className="relative mx-auto flex w-full max-w-md flex-col items-center lg:max-w-none lg:justify-self-end">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-[#c5a059]/25 via-[#faf8f3] to-[#0d4f4f]/15 blur-2xl"
+          />
+          <div className="relative flex flex-col items-center">
+            <Logo variant="full" surface="card" href={null} className="mx-auto" />
+            <p className="mt-4 text-center text-sm font-medium uppercase tracking-[0.2em] text-[#0d4f4f]/60">
               Trusted online Quran learning
             </p>
           </div>

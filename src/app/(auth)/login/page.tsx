@@ -32,7 +32,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-8 px-4 py-10 md:px-6 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
       <section className="rounded-[36px] border border-[#0d4f4f]/20 bg-[#0d4f4f] p-8 text-white shadow-2xl shadow-[#0d4f4f]/20 md:p-10">
-        <Logo variant="full" href="/" className="max-w-[180px] brightness-0 invert" />
+        <Logo variant="full" surface="pill" href="/" className="max-w-[180px]" />
         <p className="mt-6 text-sm uppercase tracking-[0.28em] text-[#c5a059]">{APP_TAGLINE}</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight">Welcome back</h1>
         <p className="mt-5 max-w-2xl text-base leading-8 text-white/80">
