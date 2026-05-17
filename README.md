@@ -16,39 +16,65 @@ npm run dev
 
 ## Docker
 
-`docker compose build` / `up` does **not** seed the database by itself. After pull or rebuild, run setup once:
+`docker compose build` / `up` does **not** create demo users. You must **seed** the database once.
+
+### Quick reset (recommended if login fails)
+
+From the project folder:
 
 ```bash
-cp .env.example .env
-# Set AUTH_SECRET in .env (required for login), e.g.:
-# AUTH_SECRET=dev-secret-at-least-32-characters-long
+chmod +x scripts/docker-reset.sh
+./scripts/docker-reset.sh
+```
 
+Then open [http://localhost:3000/login](http://localhost:3000/login):
+
+| Field | Value |
+|-------|--------|
+| Email | `admin@demo.local` |
+| Password | `DevPass123!` |
+
+(Copy/paste the password — capital **D** and **P**, `123`, exclamation `!`.)
+
+### Manual steps
+
+```bash
 docker compose up -d postgres
-docker compose --profile setup run --rm db-setup
+docker compose --profile setup run --rm db-setup   # creates users
 docker compose up -d --build
 ```
 
-Demo login (only exists **after** `db:seed` above):
+Optional: `cp .env.example .env` to override `AUTH_SECRET` (Compose sets a dev default if `.env` is missing).
 
-| Email | Password |
-|-------|----------|
-| `admin@demo.local` | `DevPass123!` |
+### Troubleshooting login
 
-Same password for `teacher@demo.local`, `parent@demo.local`, `student@demo.local`.
-
-**If login still fails:** Postgres data may be old. Reset DB and re-seed:
+**1. Confirm demo users exist**
 
 ```bash
-docker compose down -v
-docker compose --profile setup run --rm db-setup
-docker compose up -d --build
+docker compose exec postgres psql -U quran -d quran_class_saas -c \
+  'SELECT email, role, ("passwordHash" IS NOT NULL) AS has_password FROM "User";'
 ```
 
-From your machine (Postgres exposed on port 5432), you can also run:
+You should see four rows (`admin@demo.local`, etc.) with `has_password = t`. If the table is empty, run `docker compose --profile setup run --rm db-setup` again.
+
+**2. Confirm the app uses the Compose database**
 
 ```bash
-DATABASE_URL="postgresql://quran:quran_dev_password@localhost:5432/quran_class_saas?schema=public" npm run db:push
-DATABASE_URL="postgresql://quran:quran_dev_password@localhost:5432/quran_class_saas?schema=public" npm run db:seed
+docker compose exec web printenv DATABASE_URL
+```
+
+Must contain `@postgres:5432`, **not** `@localhost:5432`. If it shows `localhost`, recreate the web container: `docker compose up -d --force-recreate web`.
+
+**3. Check web logs while signing in**
+
+```bash
+docker compose logs web --tail 30
+```
+
+**4. Nuclear reset** (wipes all DB data)
+
+```bash
+./scripts/docker-reset.sh
 ```
 
 Open [http://localhost:3000](http://localhost:3000). Demo logins are written to the database when you run `npm run db:seed` (see `prisma/seed.ts`). Passwords are stored as bcrypt hashes in `User.passwordHash`, not in plain text.
