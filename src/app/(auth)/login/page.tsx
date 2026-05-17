@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
+import { Logo } from "@/components/brand/logo";
+import { APP_NAME, APP_TAGLINE } from "@/lib/brand";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -29,12 +31,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-8 px-4 py-10 md:px-6 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-10">
-      <section className="rounded-[36px] border border-slate-200/80 bg-slate-950 p-8 text-white shadow-2xl shadow-slate-950/15 md:p-10">
-        <p className="text-sm uppercase tracking-[0.28em] text-teal-200">Role-based authentication</p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight">Secure access for every role</h1>
-        <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300">
-          Sign in with the email and password your school issued. You will be routed to the admin console, teacher
-          desk, or family portal based on your role.
+      <section className="rounded-[36px] border border-[#0d4f4f]/20 bg-[#0d4f4f] p-8 text-white shadow-2xl shadow-[#0d4f4f]/20 md:p-10">
+        <Logo variant="full" href="/" className="max-w-[180px] brightness-0 invert" />
+        <p className="mt-6 text-sm uppercase tracking-[0.28em] text-[#c5a059]">{APP_TAGLINE}</p>
+        <h1 className="mt-4 text-4xl font-semibold tracking-tight">Welcome back</h1>
+        <p className="mt-5 max-w-2xl text-base leading-8 text-white/80">
+          Sign in with the email and password you were given. You will be routed to your family portal, teacher desk, or
+          admin console based on your role.
         </p>
         <div className="mt-8 grid gap-4">
           {roleCards.map((card) => (
@@ -48,7 +51,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       <section className="rounded-[36px] border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-950/5 md:p-10">
         <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Sign in</p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Quran Class</h2>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#0d4f4f]">{APP_NAME}</h2>
         <p className="mt-4 text-sm leading-7 text-slate-600">
           Default redirect after login is the family portal unless <code className="text-xs">callbackUrl</code> is set
           (for example from the marketing site). Current callback:{" "}

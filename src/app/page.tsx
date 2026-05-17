@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/landing/site-header";
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[color:var(--landing-bg)] text-slate-900">
+    <div className="flex min-h-screen flex-col bg-[color:var(--landing-bg)] text-[#0d4f4f]">
       <SiteHeader />
       <main className="flex-1">
         <Hero />

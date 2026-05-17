@@ -1,50 +1,72 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Calendar, Shield, Sparkles } from "lucide-react";
+import { ArrowRight, Globe, Headphones, Video } from "lucide-react";
+import { APP_TAGLINE } from "@/lib/brand";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden px-4 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-14">
+    <section className="relative overflow-hidden px-4 pb-20 pt-8 sm:px-6 sm:pb-28 sm:pt-12">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(13,148,136,0.15),transparent)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_55%_at_70%_0%,rgba(197,160,89,0.18),transparent),radial-gradient(ellipse_60%_50%_at_10%_20%,rgba(13,79,79,0.1),transparent)]"
       />
-      <div className="mx-auto max-w-6xl">
-        <div className="inline-flex items-center gap-2 rounded-full border border-teal-200/80 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-800">
-          <Sparkles className="h-3.5 w-3.5" aria-hidden />
-          Built for online Quran schools
+      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        <div>
+          <p className="inline-flex items-center gap-2 rounded-full border border-[#c5a059]/40 bg-[#c5a059]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#0d4f4f]">
+            <Globe className="h-3.5 w-3.5 text-[#c5a059]" aria-hidden />
+            {APP_TAGLINE}
+          </p>
+          <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight text-[#0d4f4f] sm:text-5xl lg:text-[3.25rem]">
+            Learn Quran from{" "}
+            <span className="text-[#c5a059]">anywhere</span>
+          </h1>
+          <p className="mt-5 max-w-xl text-lg leading-8 text-[#0d4f4f]/75">
+            Book live classes with qualified teachers, join on Zoom from home or on the go, and follow your tajwid and
+            memorisation progress — all in one place.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Link
+              href="/login?callbackUrl=%2Fstudents"
+              className="inline-flex items-center gap-2 rounded-full bg-[#0d4f4f] px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#0d4f4f]/25 transition hover:bg-[#156b6b]"
+            >
+              Start learning today
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <Link
+              href="/login?callbackUrl=%2Fteacher"
+              className="inline-flex items-center gap-2 rounded-full border border-[#0d4f4f]/20 bg-white px-6 py-3.5 text-sm font-semibold text-[#0d4f4f] shadow-sm transition hover:border-[#0d4f4f]/35 hover:bg-[#faf8f3]"
+            >
+              I&apos;m a teacher
+            </Link>
+          </div>
+          <ul className="mt-10 flex flex-col gap-3 text-sm text-[#0d4f4f]/80 sm:flex-row sm:flex-wrap sm:gap-x-8">
+            <li className="flex items-center gap-2">
+              <Video className="h-4 w-4 text-[#c5a059]" aria-hidden />
+              Live online classes with Zoom
+            </li>
+            <li className="flex items-center gap-2">
+              <Headphones className="h-4 w-4 text-[#c5a059]" aria-hidden />
+              Tajwid, recitation &amp; memorisation
+            </li>
+          </ul>
         </div>
-        <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl sm:leading-[1.1]">
-          Run Quran recitation classes like a modern SaaS
-        </h1>
-        <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-          Parents book teachers, you collect per-session or package payments, classes go live with meeting links,
-          and every lesson leaves a clear trail of notes and progress.
-        </p>
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Link
-            href="/login?callbackUrl=%2Fstudents"
-            className="inline-flex items-center gap-2 rounded-full bg-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-600/20 transition hover:bg-teal-500"
-          >
-            Start as a family
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
-          <Link
-            href="/login?callbackUrl=%2Fadmin"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-400 hover:bg-slate-50"
-          >
-            Open admin console
-          </Link>
+
+        <div className="relative mx-auto w-full max-w-md lg:max-w-none lg:justify-self-end">
+          <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-[#c5a059]/20 via-transparent to-[#0d4f4f]/10 blur-2xl" aria-hidden />
+          <div className="relative overflow-hidden rounded-[2rem] border border-[#0d4f4f]/10 bg-white p-6 shadow-xl shadow-[#0d4f4f]/10 sm:p-8">
+            <Image
+              src="/logo.png"
+              alt="jomngaji.my"
+              width={480}
+              height={480}
+              className="mx-auto h-auto w-full max-w-[320px] object-contain sm:max-w-[380px]"
+              priority
+            />
+            <p className="mt-6 text-center text-sm font-medium uppercase tracking-[0.2em] text-[#0d4f4f]/60">
+              Trusted online Quran learning
+            </p>
+          </div>
         </div>
-        <ul className="mt-12 flex flex-wrap gap-x-8 gap-y-3 text-sm text-slate-600">
-          <li className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-teal-600" aria-hidden />
-            Calendar booking with teacher availability
-          </li>
-          <li className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-teal-600" aria-hidden />
-            Role-based access for admin, teacher, and family
-          </li>
-        </ul>
       </div>
     </section>
   );

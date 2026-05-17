@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f6fb;
-  --foreground: #0f172a;
-  --landing-bg: #f3f6fb;
+  --background: #f7f4eb;
+  --foreground: #0f2929;
+  --landing-bg: #faf8f3;
+  --brand-teal: #0d4f4f;
+  --brand-teal-light: #156b6b;
+  --brand-gold: #c5a059;
+  --brand-cream: #f7f4eb;
 }
 
 @theme inline {
@@ -24,8 +28,8 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(45, 212, 191, 0.18), transparent 30%),
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 28%),
+    radial-gradient(circle at top left, rgba(197, 160, 89, 0.12), transparent 32%),
+    radial-gradient(circle at top right, rgba(13, 79, 79, 0.08), transparent 28%),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;

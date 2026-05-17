@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import type { ReactNode } from "react";
+import { Logo } from "@/components/brand/logo";
+import { APP_NAME } from "@/lib/brand";
 import type { NavItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -29,15 +31,9 @@ export function DashboardShell({
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950">
       <div className="mx-auto grid min-h-screen max-w-[1600px] gap-6 px-4 py-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-6">
-        <aside className="rounded-[32px] border border-slate-200/80 bg-slate-950 p-6 text-white shadow-xl shadow-slate-950/15">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500 text-lg font-semibold text-white">
-              QR
-            </div>
-            <div>
-              <p className="text-sm uppercase tracking-[0.22em] text-teal-200">Quran SaaS</p>
-              <p className="text-lg font-semibold">Class management</p>
-            </div>
+        <aside className="rounded-[32px] border border-[#0d4f4f]/20 bg-[#0d4f4f] p-6 text-white shadow-xl shadow-[#0d4f4f]/20">
+          <Link href="/" className="block">
+            <Logo variant="full" className="max-w-[160px] brightness-0 invert" />
           </Link>
 
           <div className="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-4">
@@ -82,8 +78,8 @@ export function DashboardShell({
               <p className="text-sm uppercase tracking-[0.2em] text-teal-700">{workspaceTitle}</p>
               <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{workspaceTagline}</h1>
             </div>
-            <div className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200">
-              Quran Class
+            <div className="rounded-full bg-white px-4 py-2 text-sm font-medium text-[#0d4f4f] ring-1 ring-slate-200">
+              {APP_NAME}
             </div>
           </div>
           <div className="space-y-6">{children}</div>

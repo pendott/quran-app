@@ -25,7 +25,7 @@ export async function dispatchDueReminders(limit = 30) {
       if (useResend) {
         const ok = await sendEmailViaResend(
           email,
-          `Quran Class — ${r.templateKey.replace(/_/g, " ")}`,
+          `jomngaji.my — ${r.templateKey.replace(/_/g, " ")}`,
           `<p>You have an upcoming reminder.</p><p><strong>${r.templateKey}</strong></p>`,
         );
         if (!ok) {

@@ -1,51 +1,51 @@
-import { BookOpen, CreditCard, LineChart, Video } from "lucide-react";
+import { BookOpen, Calendar, MapPin, Video } from "lucide-react";
 
 const items = [
   {
-    icon: BookOpen,
-    title: "Progress that parents understand",
-    body: "Surah, ayah, tajwid notes, homework, and next targets roll into a simple timeline after each class.",
+    icon: MapPin,
+    title: "Learn from anywhere",
+    body: "Home, office, or travelling — book a slot that fits your timezone and join your teacher online in seconds.",
   },
   {
     icon: Video,
-    title: "Live classes and recordings",
-    body: "Generate meeting links, mark attendance, and attach recordings so families can replay lessons safely.",
+    title: "Live one-to-one classes",
+    body: "Face-to-face recitation with qualified ustaz and ustazah via Zoom, with meeting links ready when class starts.",
   },
   {
-    icon: CreditCard,
-    title: "Per session or packages",
-    body: "Single lessons, 4- or 8-session bundles, and monthly plans with credits that booking logic can consume.",
+    icon: BookOpen,
+    title: "Track your progress",
+    body: "Surah, ayah, tajwid notes, and homework after every lesson so parents and students always know what to practise.",
   },
   {
-    icon: LineChart,
-    title: "Admin visibility",
-    body: "Revenue, pending payments, teacher load, and attendance in one dashboard built for daily operations.",
+    icon: Calendar,
+    title: "Flexible scheduling",
+    body: "Pick teachers who match your level, book per session or save with packages, and get reminders before each class.",
   },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="scroll-mt-20 border-t border-slate-200/80 bg-white px-4 py-16 sm:px-6 sm:py-24">
+    <section id="features" className="scroll-mt-24 border-t border-[#0d4f4f]/10 bg-white px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-6xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-700">Features</p>
-        <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-          Everything you need to operate classes end to end
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#c5a059]">Why jomngaji.my</p>
+        <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-[#0d4f4f] sm:text-4xl">
+          Everything you need to learn Quran online
         </h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-          The product is designed around how Quran schools actually work: mixed ages, rotating teachers,
-          package renewals, and parents who want clarity without spreadsheets.
+        <p className="mt-4 max-w-2xl text-base leading-7 text-[#0d4f4f]/70">
+          Whether you are starting tajwid, strengthening recitation, or memorising — connect with teachers and stay on
+          track without leaving home.
         </p>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {items.map(({ icon: Icon, title, body }) => (
             <article
               key={title}
-              className="rounded-2xl border border-slate-200/90 bg-slate-50/50 p-6 shadow-sm transition hover:border-teal-200/80 hover:shadow-md"
+              className="rounded-2xl border border-[#0d4f4f]/10 bg-[#faf8f3] p-6 shadow-sm transition hover:border-[#c5a059]/40 hover:shadow-md"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0d4f4f] text-white">
                 <Icon className="h-5 w-5" aria-hidden />
               </div>
-              <h3 className="mt-4 text-base font-semibold text-slate-900">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
+              <h3 className="mt-4 text-base font-semibold text-[#0d4f4f]">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-[#0d4f4f]/70">{body}</p>
             </article>
           ))}
         </div>

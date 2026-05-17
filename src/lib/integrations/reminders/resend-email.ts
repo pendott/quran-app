@@ -6,7 +6,7 @@ export async function sendEmailViaResend(to: string, subject: string, html: stri
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return false;
 
-  const from = process.env.RESEND_FROM ?? "Quran Class <onboarding@resend.dev>";
+  const from = process.env.RESEND_FROM ?? "jomngaji.my <onboarding@resend.dev>";
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
