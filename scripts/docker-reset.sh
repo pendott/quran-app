@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")/.."
 
 echo "==> Stopping containers and removing database volume..."
-docker compose down -v
+docker compose down -v --remove-orphans
 
 echo "==> Starting Postgres..."
 docker compose up -d postgres
@@ -22,7 +22,7 @@ docker compose exec -T postgres psql -U quran -d quran_class_saas -c \
   'SELECT email, role, status, ("passwordHash" IS NOT NULL) AS has_password FROM "User" ORDER BY email;'
 
 echo "==> Building and starting web..."
-docker compose up -d --build
+docker compose up -d --build --remove-orphans
 
 echo ""
 echo "Done. Open http://localhost:3000/login"
