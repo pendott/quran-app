@@ -49,7 +49,7 @@ export default async function AdminDashboardPage() {
           description="Confirmed and pending sessions for the next 48 hours."
         >
           {upcomingRows.length ? (
-            <DataTable columns={["Student", "Teacher", "Time", "Plan", "Status"]} rows={upcomingRows} />
+            <DataTable columns={["Student", "Teacher", "Time", "Plan", "Zoom / join", "Status"]} rows={upcomingRows} />
           ) : (
             <p className="text-sm text-slate-500">No upcoming classes in this window.</p>
           )}

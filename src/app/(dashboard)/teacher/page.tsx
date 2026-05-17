@@ -60,7 +60,7 @@ export default async function TeacherDashboardPage() {
           description="Sessions scheduled for the current UTC calendar day."
         >
           {todayRows.length ? (
-            <DataTable columns={["Time", "Student", "Topic", "Join", "Status", "Session"]} rows={todayRows} />
+            <DataTable columns={["Time", "Student", "Topic", "Zoom / join", "Status", "Session"]} rows={todayRows} />
           ) : (
             <p className="text-sm text-slate-500">No classes today in this window.</p>
           )}

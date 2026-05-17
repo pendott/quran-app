@@ -46,7 +46,7 @@ export default async function StudentsBookingsPage({ searchParams }: Props) {
 
       <SectionCard title="Your bookings" description="Recent and upcoming reservations.">
         {rows.length ? (
-          <DataTable columns={["Slot", "Teacher", "Package", "Meeting", "Status"]} rows={rows} />
+          <DataTable columns={["Slot", "Teacher", "Package", "Zoom / join", "Status"]} rows={rows} />
         ) : (
           <p className="text-sm text-slate-500">No bookings yet.</p>
         )}

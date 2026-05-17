@@ -39,7 +39,7 @@ export async function getAdminBookingForEdit(bookingId: string) {
     include: {
       student: true,
       teacher: { include: { user: true } },
-      classSession: true,
+      classSession: { include: { meetingLink: true } },
       pricingRule: true,
       packagePurchase: { include: { package: true } },
     },

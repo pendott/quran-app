@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { completeClassSessionAction, startClassSessionAction, updateSessionAttendanceAction } from "@/app/actions/session";
+import { MeetingJoinLink } from "@/components/dashboard/meeting-join-link";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { ClassNoteEditor } from "@/components/teacher/class-note-editor";
 import { RecordingEditor } from "@/components/teacher/recording-editor";
@@ -56,16 +57,17 @@ export default async function TeacherSessionPage({ params }: Props) {
         title={`Session · ${cs.student.displayName}`}
         description={`${formatDateTime(cs.scheduledStartAt)} · Status: ${cs.status}`}
       >
-        <p className="mb-4 text-sm text-slate-600">
-          Join link:{" "}
-          {cs.meetingLink ? (
-            <a href={cs.meetingLink.joinUrl} className="font-medium text-teal-700 underline" target="_blank" rel="noreferrer">
-              Open meeting
-            </a>
-          ) : (
-            "Not set"
-          )}
-        </p>
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Meeting link</p>
+          <MeetingJoinLink
+            joinUrl={cs.meetingLink?.joinUrl}
+            provider={cs.meetingLink?.provider}
+            pendingReason="No link — ask admin to confirm booking or check Zoom settings"
+          />
+          {cs.meetingLink?.joinUrl ? (
+            <p className="mt-2 break-all font-mono text-[11px] text-slate-500">{cs.meetingLink.joinUrl}</p>
+          ) : null}
+        </div>
         <div className="flex flex-wrap gap-2">
           <form action={startClassSessionAction}>
             <input type="hidden" name="sessionId" value={sessionId} />

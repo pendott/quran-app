@@ -23,7 +23,7 @@ export default async function TeacherClassesPage() {
       {dbError ? <DbBanner message="Database unavailable." /> : null}
       <SectionCard title="Upcoming classes" description="Your class sessions with join link status.">
         {rows.length ? (
-          <DataTable columns={["Time", "Student", "Topic", "Join", "Status", "Session"]} rows={rows} />
+          <DataTable columns={["Time", "Student", "Topic", "Zoom / join", "Status", "Session"]} rows={rows} />
         ) : (
           <p className="text-sm text-slate-500">No sessions yet.</p>
         )}

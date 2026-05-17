@@ -2,6 +2,7 @@ import { addDays } from "date-fns";
 import Link from "next/link";
 import { createElement } from "react";
 import { prisma } from "@/lib/db";
+import { meetingJoinLinkCell } from "@/components/dashboard/meeting-join-link";
 import { formatDateTime } from "@/lib/format";
 import { isDatabaseUnavailable } from "@/server/db-guard";
 import type { Stat, TableRow } from "@/lib/types";
@@ -66,7 +67,11 @@ export async function getTeacherClassesTable(teacherId: string): Promise<{ rows:
       Time: formatDateTime(cs.scheduledStartAt),
       Student: cs.student.displayName,
       Topic: cs.booking.pricingRuleId ? "Scheduled" : "Class",
-      Join: cs.meetingLink?.joinUrl ? "Link ready" : "No link",
+      "Zoom / join": meetingJoinLinkCell(
+        cs.meetingLink?.joinUrl,
+        cs.meetingLink?.provider,
+        "No link — booking may not be confirmed",
+      ),
       Status: cs.status.replace(/_/g, " "),
       Session: createElement(
         Link,
@@ -105,7 +110,11 @@ export async function getTeacherTodaySessionsTable(teacherId: string): Promise<{
       Time: formatDateTime(cs.scheduledStartAt),
       Student: cs.student.displayName,
       Topic: cs.booking.pricingRuleId ? "Scheduled" : "Class",
-      Join: cs.meetingLink?.joinUrl ? "Link ready" : "No link",
+      "Zoom / join": meetingJoinLinkCell(
+        cs.meetingLink?.joinUrl,
+        cs.meetingLink?.provider,
+        "No link — booking may not be confirmed",
+      ),
       Status: cs.status.replace(/_/g, " "),
       Session: createElement(
         Link,

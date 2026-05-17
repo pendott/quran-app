@@ -4,6 +4,7 @@ import { DbBanner } from "@/components/dashboard/db-banner";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { AdminCancelBookingButton } from "@/components/admin/admin-cancel-booking-button";
 import { AdminCreateBookingForm } from "@/components/admin/admin-create-booking-form";
+import { MeetingJoinLink } from "@/components/dashboard/meeting-join-link";
 import { getAdminBookingFormOptions } from "@/server/queries/admin-booking";
 import { formatDateTime } from "@/lib/format";
 import { prisma } from "@/lib/db";
@@ -13,6 +14,7 @@ const bookingInclude = {
   teacher: { include: { user: true } },
   packagePurchase: { include: { package: true } },
   pricingRule: true,
+  classSession: { include: { meetingLink: true } },
 } satisfies Prisma.BookingInclude;
 
 type BookingRow = Prisma.BookingGetPayload<{ include: typeof bookingInclude }>;
@@ -83,7 +85,7 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
             <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
               <thead className="bg-slate-50/90">
                 <tr>
-                  {["Student", "Teacher", "Slot", "Source", "Status", "Actions"].map((h) => (
+                  {["Student", "Teacher", "Slot", "Source", "Zoom / join", "Status", "Actions"].map((h) => (
                     <th key={h} className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       {h}
                     </th>
@@ -98,6 +100,19 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
                     <td className="px-4 py-3">{formatDateTime(b.scheduledStartAt)}</td>
                     <td className="px-4 py-3">
                       {b.packagePurchase ? b.packagePurchase.package.name : (b.pricingRule?.name ?? "—")}
+                    </td>
+                    <td className="px-4 py-3">
+                      <MeetingJoinLink
+                        joinUrl={b.classSession?.meetingLink?.joinUrl}
+                        provider={b.classSession?.meetingLink?.provider}
+                        pendingReason={
+                          b.status === "PENDING_PAYMENT"
+                            ? "After payment / confirm"
+                            : b.status === "CANCELLED"
+                              ? "Cancelled"
+                              : "Confirm booking to generate Zoom link"
+                        }
+                      />
                     </td>
                     <td className="px-4 py-3">{b.status.replace(/_/g, " ")}</td>
                     <td className="px-4 py-3">

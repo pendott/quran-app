@@ -1,5 +1,6 @@
 import { BookingStatus } from "@prisma/client";
 import { addDays } from "date-fns";
+import { meetingJoinLinkCell } from "@/components/dashboard/meeting-join-link";
 import { prisma } from "@/lib/db";
 import { formatDateTime, formatMYR } from "@/lib/format";
 import { isDatabaseUnavailable } from "@/server/db-guard";
@@ -44,6 +45,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
           teacher: { include: { user: true } },
           pricingRule: true,
           packagePurchase: { include: { package: true } },
+          classSession: { include: { meetingLink: true } },
         },
       }),
       prisma.payment.findMany({
@@ -81,13 +83,21 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       },
     ];
 
-    const upcomingRows: TableRow[] = upcoming.map((b) => ({
-      Student: b.student.displayName,
-      Teacher: b.teacher.user.name ?? b.teacher.user.email,
-      Time: formatDateTime(b.scheduledStartAt),
-      Plan: b.packagePurchase ? b.packagePurchase.package.name : (b.pricingRule?.name ?? "—"),
-      Status: b.status.replace(/_/g, " "),
-    }));
+    const upcomingRows: TableRow[] = upcoming.map((b) => {
+      const link = b.classSession?.meetingLink;
+      return {
+        Student: b.student.displayName,
+        Teacher: b.teacher.user.name ?? b.teacher.user.email,
+        Time: formatDateTime(b.scheduledStartAt),
+        Plan: b.packagePurchase ? b.packagePurchase.package.name : (b.pricingRule?.name ?? "—"),
+        "Zoom / join": meetingJoinLinkCell(
+          link?.joinUrl,
+          link?.provider,
+          b.status === "PENDING_PAYMENT" ? "After payment / confirm" : "No link yet",
+        ),
+        Status: b.status.replace(/_/g, " "),
+      };
+    });
 
     const pendingPaymentRows: TableRow[] = pendingPayments.map((p) => ({
       Invoice: p.id.slice(0, 8).toUpperCase(),

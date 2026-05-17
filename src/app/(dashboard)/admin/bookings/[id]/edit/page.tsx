@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminEditBookingForm } from "@/components/admin/admin-edit-booking-form";
+import { MeetingJoinLink } from "@/components/dashboard/meeting-join-link";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { formatDateTime } from "@/lib/format";
 import { getAdminBookingForEdit, getAdminBookingFormOptions } from "@/server/queries/admin-booking";
@@ -37,6 +38,23 @@ export default async function AdminEditBookingPage({ params, searchParams }: Pro
           Booking created. You can adjust details below.
         </p>
       ) : null}
+
+      <SectionCard title="Zoom meeting link" description="Generated when booking is confirmed and Zoom is configured.">
+        <MeetingJoinLink
+          joinUrl={booking.classSession?.meetingLink?.joinUrl}
+          provider={booking.classSession?.meetingLink?.provider}
+          pendingReason={
+            booking.status === "CONFIRMED"
+              ? "No link yet — save as confirmed again or check Zoom env / logs"
+              : "Set status to Confirmed to create a Zoom link"
+          }
+        />
+        {booking.classSession?.meetingLink?.joinUrl ? (
+          <p className="mt-2 break-all font-mono text-[11px] text-slate-500">
+            {booking.classSession.meetingLink.joinUrl}
+          </p>
+        ) : null}
+      </SectionCard>
 
       <SectionCard
         title="Edit booking"

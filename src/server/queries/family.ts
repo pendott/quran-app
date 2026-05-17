@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { meetingJoinLinkCell } from "@/components/dashboard/meeting-join-link";
 import { formatDateTime, formatMYR } from "@/lib/format";
 import { isDatabaseUnavailable } from "@/server/db-guard";
 import type { Stat, TableRow, TimelineItem, UserRole } from "@/lib/types";
@@ -18,6 +19,14 @@ export async function getFamilyStudentIds(userId: string, role: UserRole): Promi
   return [];
 }
 
+export type NextClassMeeting = {
+  scheduledAt: string;
+  teacherName: string;
+  joinUrl: string | null;
+  provider: string | null;
+  pendingReason: string | null;
+};
+
 export async function getFamilyDashboard(
   userId: string,
   role: UserRole,
@@ -25,6 +34,7 @@ export async function getFamilyDashboard(
   stats: Stat[];
   timeline: TimelineItem[];
   recordingRows: TableRow[];
+  nextClass: NextClassMeeting | null;
   dbError: boolean;
 }> {
   try {
@@ -39,6 +49,7 @@ export async function getFamilyDashboard(
         ],
         timeline: [],
         recordingRows: [],
+        nextClass: null,
         dbError: false,
       };
     }
@@ -50,7 +61,10 @@ export async function getFamilyDashboard(
         scheduledStartAt: { gte: new Date() },
       },
       orderBy: { scheduledStartAt: "asc" },
-      include: { teacher: { include: { user: true } } },
+      include: {
+        teacher: { include: { user: true } },
+        classSession: { include: { meetingLink: true } },
+      },
     });
 
     const purchases = await prisma.packagePurchase.findMany({
@@ -129,7 +143,23 @@ export async function getFamilyDashboard(
       Notes: r.playbackUrl ? "Link" : "—",
     }));
 
-    return { stats, timeline, recordingRows, dbError: false };
+    const link = nextBooking?.classSession?.meetingLink;
+    const nextClass: NextClassMeeting | null = nextBooking
+      ? {
+          scheduledAt: formatDateTime(nextBooking.scheduledStartAt),
+          teacherName: nextBooking.teacher.user.name ?? "Teacher",
+          joinUrl: link?.joinUrl ?? null,
+          provider: link?.provider ?? null,
+          pendingReason:
+            nextBooking.status === "PENDING_PAYMENT"
+              ? "Pay or wait for admin to confirm — then Zoom link appears"
+              : link
+                ? null
+                : "Link generating — refresh after booking is confirmed",
+        }
+      : null;
+
+    return { stats, timeline, recordingRows, nextClass, dbError: false };
   } catch (e) {
     if (!isDatabaseUnavailable(e)) console.error(e);
     return {
@@ -141,6 +171,7 @@ export async function getFamilyDashboard(
       ],
       timeline: [],
       recordingRows: [],
+      nextClass: null,
       dbError: true,
     };
   }
@@ -159,16 +190,26 @@ export async function getFamilyBookingsTable(userId: string, role: UserRole): Pr
         teacher: { include: { user: true } },
         packagePurchase: { include: { package: true } },
         pricingRule: true,
+        classSession: { include: { meetingLink: true } },
       },
     });
 
-    const rows: TableRow[] = bookings.map((b) => ({
-      Slot: formatDateTime(b.scheduledStartAt),
-      Teacher: b.teacher.user.name ?? b.teacher.user.email,
-      Package: b.packagePurchase ? b.packagePurchase.package.name : (b.pricingRule?.name ?? "—"),
-      Meeting: b.status === "CONFIRMED" ? "Scheduled" : b.status.replace(/_/g, " "),
-      Status: b.status.replace(/_/g, " "),
-    }));
+    const rows: TableRow[] = bookings.map((b) => {
+      const link = b.classSession?.meetingLink;
+      const pendingReason =
+        b.status === "PENDING_PAYMENT"
+          ? "After payment"
+          : b.status === "CANCELLED"
+            ? "Cancelled"
+            : "Confirm booking first";
+      return {
+        Slot: formatDateTime(b.scheduledStartAt),
+        Teacher: b.teacher.user.name ?? b.teacher.user.email,
+        Package: b.packagePurchase ? b.packagePurchase.package.name : (b.pricingRule?.name ?? "—"),
+        "Zoom / join": meetingJoinLinkCell(link?.joinUrl, link?.provider, pendingReason),
+        Status: b.status.replace(/_/g, " "),
+      };
+    });
 
     return { rows, dbError: false };
   } catch (e) {
