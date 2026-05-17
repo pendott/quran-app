@@ -6,8 +6,28 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    environment:
+      # Override localhost from Dockerfile — inside Compose, Postgres is the `postgres` service.
+      DATABASE_URL: postgresql://quran:quran_dev_password@postgres:5432/quran_class_saas?schema=public
+      AUTH_URL: http://localhost:3000
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
+  # One-shot: sync schema + demo users (run after pull/rebuild if login fails).
+  db-setup:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_URL: postgresql://quran:quran_dev_password@postgres:5432/quran_class_saas?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npm ci && npx prisma db push && npx prisma db seed"
+    profiles:
+      - setup
 
   postgres:
     image: postgres:16-alpine
@@ -20,6 +40,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quran -d quran_class_saas"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres_data:

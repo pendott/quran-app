@@ -6,7 +6,7 @@ Online Quran class booking and payments for Malaysian families — admin, teache
 
 ```bash
 cp .env.example .env
-# Edit DATABASE_URL and AUTH_SECRET (min 32 chars)
+# Edit DATABASE_URL and AUTH_SECRET (min 32 chars, e.g. openssl rand -base64 32)
 
 npm install
 npm run db:push
@@ -14,13 +14,53 @@ npm run db:seed
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Demo logins are created by the seed (see `prisma/seed.ts`).
+## Docker
 
-| Role   | Email              | Password   |
-|--------|--------------------|------------|
-| Admin  | admin@demo.local   | demo12345  |
-| Parent | parent@demo.local  | demo12345  |
-| Teacher| teacher@demo.local | demo12345 |
+`docker compose build` / `up` does **not** seed the database by itself. After pull or rebuild, run setup once:
+
+```bash
+cp .env.example .env
+# Set AUTH_SECRET in .env (required for login), e.g.:
+# AUTH_SECRET=dev-secret-at-least-32-characters-long
+
+docker compose up -d postgres
+docker compose --profile setup run --rm db-setup
+docker compose up -d --build
+```
+
+Demo login (only exists **after** `db:seed` above):
+
+| Email | Password |
+|-------|----------|
+| `admin@demo.local` | `DevPass123!` |
+
+Same password for `teacher@demo.local`, `parent@demo.local`, `student@demo.local`.
+
+**If login still fails:** Postgres data may be old. Reset DB and re-seed:
+
+```bash
+docker compose down -v
+docker compose --profile setup run --rm db-setup
+docker compose up -d --build
+```
+
+From your machine (Postgres exposed on port 5432), you can also run:
+
+```bash
+DATABASE_URL="postgresql://quran:quran_dev_password@localhost:5432/quran_class_saas?schema=public" npm run db:push
+DATABASE_URL="postgresql://quran:quran_dev_password@localhost:5432/quran_class_saas?schema=public" npm run db:seed
+```
+
+Open [http://localhost:3000](http://localhost:3000). Demo logins are written to the database when you run `npm run db:seed` (see `prisma/seed.ts`). Passwords are stored as bcrypt hashes in `User.passwordHash`, not in plain text.
+
+| Role    | Email               | Password      |
+|---------|---------------------|---------------|
+| Admin   | admin@demo.local    | DevPass123!   |
+| Teacher | teacher@demo.local  | DevPass123!   |
+| Parent  | parent@demo.local   | DevPass123!   |
+| Student | student@demo.local  | DevPass123!   |
+
+Sign in at `/login` with the email and password above. Re-run `npm run db:seed` to reset demo data (this wipes and recreates seed rows).
 
 ## Pilot go-live (Vercel + Postgres)
 
