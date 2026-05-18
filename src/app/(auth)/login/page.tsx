@@ -10,21 +10,6 @@ type LoginPageProps = {
   }>;
 };
 
-const roleCards = [
-  {
-    title: "Admin",
-    description: "Full access to teacher, student, booking, payment, pricing, and recording management.",
-  },
-  {
-    title: "Teacher",
-    description: "Limited to assigned classes, student history, attendance, and Quran class notes.",
-  },
-  {
-    title: "Student / Parent",
-    description: "Limited to own bookings, package credits, recordings, reminders, and progress.",
-  },
-];
-
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const callbackUrl = typeof params.callbackUrl === "string" ? params.callbackUrl : "/students";
@@ -36,17 +21,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <p className="mt-6 text-sm uppercase tracking-[0.28em] text-[#c5a059]">{APP_TAGLINE}</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight">Welcome back</h1>
         <p className="mt-5 max-w-2xl text-base leading-8 text-white/80">
-          Sign in with the email and password you were given. You will be routed to your family portal, teacher desk, or
-          admin console based on your role.
+          Sign in with the email and password you were given. You will be routed to the right workspace for your account.
         </p>
-        <div className="mt-8 grid gap-4">
-          {roleCards.map((card) => (
-            <article key={card.title} className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-              <h2 className="text-lg font-semibold">{card.title}</h2>
-              <p className="mt-2 text-sm leading-7 text-slate-300">{card.description}</p>
-            </article>
-          ))}
-        </div>
       </section>
 
       <section className="rounded-[36px] border border-slate-200/80 bg-white p-8 shadow-sm shadow-slate-950/5 md:p-10">
