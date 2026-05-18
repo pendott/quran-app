@@ -6,6 +6,7 @@ export const adminNavItems: NavItem[] = [
   { href: "/admin/parents", label: "Parents", description: "Parent accounts and family onboarding" },
   { href: "/admin/students", label: "Students", description: "Learner profiles, teachers, progress" },
   { href: "/admin/bookings", label: "Bookings", description: "Session flow, reschedules, status" },
+  { href: "/admin/credits", label: "Credits", description: "Grant session credits to students" },
   { href: "/admin/payments", label: "Payments", description: "Invoices, package usage, settlement" },
 ];
 
