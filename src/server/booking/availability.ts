@@ -1,6 +1,9 @@
 import { addDays, addMinutes, setHours, setMinutes, startOfDay } from "date-fns";
 import { prisma } from "@/lib/db";
 
+/** Break between bookable class slots inside one availability window. */
+const SLOT_GAP_MINUTES = 15;
+
 function parseTime(hhmm: string): { hours: number; minutes: number } {
   const [h, m] = hhmm.split(":").map((x) => Number(x));
   return { hours: h || 0, minutes: m || 0 };
@@ -55,7 +58,7 @@ export async function getAvailableSlots(
       if (!taken && slotStart >= rangeStart && slotEnd <= rangeEnd) {
         slots.push({ start: new Date(slotStart), end: new Date(slotEnd) });
       }
-      slotStart = slotEnd;
+      slotStart = addMinutes(slotEnd, SLOT_GAP_MINUTES);
     }
   }
 

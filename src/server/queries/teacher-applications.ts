@@ -9,6 +9,7 @@ import {
 } from "@/lib/teacher-application/types";
 import type { ProposedAvailability } from "@/lib/teacher-application/types";
 import { formatWeekday } from "@/lib/availability/constants";
+import { EVENING_BOOKING_SLOTS } from "@/lib/availability/evening-slots";
 
 export async function getAdminTeacherApplications(status?: TeacherApplicationStatus) {
   try {
@@ -39,9 +40,13 @@ export async function getAdminTeacherApplicationDetail(id: string) {
     if (!app) return { application: null, dbError: false as const };
 
     const availability = app.proposedAvailability as ProposedAvailability;
-    const slots = availability.slots.map(
-      (s) => `${formatWeekday(s.dayOfWeek)} ${s.startTime}–${s.endTime}`,
-    );
+    const slots = availability.slots.map((s) => {
+      const template = EVENING_BOOKING_SLOTS.find(
+        (t) => t.startTime === s.startTime && t.endTime === s.endTime,
+      );
+      const timeLabel = template?.label ?? `${s.startTime}–${s.endTime}`;
+      return `${formatWeekday(s.dayOfWeek)} ${timeLabel}`;
+    });
 
     return {
       application: {

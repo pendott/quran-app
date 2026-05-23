@@ -1,18 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   createAvailabilityAction,
   type AvailabilityFormState,
 } from "@/app/actions/availability";
 import { deleteAvailabilityAction } from "@/app/actions/availability";
-import {
-  DEFAULT_WEEKDAY_AVAILABILITY,
-  formatWeekday,
-  monthNavigation,
-  WEEKDAY_LABELS,
-} from "@/lib/availability/constants";
+import { formatWeekday, monthNavigation, WEEKDAY_LABELS } from "@/lib/availability/constants";
+import { EVENING_BOOKING_SLOTS } from "@/lib/availability/evening-slots";
 
 type RecurringRow = {
   id: string;
@@ -53,7 +49,11 @@ export function AvailabilityManager({
 }: Props) {
   const [recurringState, recurringAction, recurringPending] = useActionState(createAvailabilityAction, initial);
   const [exceptionState, exceptionAction, exceptionPending] = useActionState(createAvailabilityAction, initial);
+  const [recurringSlotId, setRecurringSlotId] = useState(EVENING_BOOKING_SLOTS[0]?.id ?? "");
+  const [exceptionSlotId, setExceptionSlotId] = useState(EVENING_BOOKING_SLOTS[0]?.id ?? "");
   const nav = monthNavigation(monthKey);
+  const recurringSlot = EVENING_BOOKING_SLOTS.find((s) => s.id === recurringSlotId) ?? EVENING_BOOKING_SLOTS[0];
+  const exceptionSlot = EVENING_BOOKING_SLOTS.find((s) => s.id === exceptionSlotId) ?? EVENING_BOOKING_SLOTS[0];
 
   return (
     <div className="space-y-8">
@@ -83,8 +83,8 @@ export function AvailabilityManager({
       <section className="rounded-[24px] border border-slate-200 bg-white p-6">
         <h2 className="text-base font-semibold text-slate-900">Weekly schedule</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Repeats every week. Parents see bookable slots from these hours. Defaults suggest 6:00&nbsp;pm–10:00&nbsp;pm
-          for after school and work.
+          Repeats every week. Pick 1-hour slots with a 15-minute break between classes (e.g. 8:00–9:00&nbsp;pm,
+          9:15–10:15&nbsp;pm, 10:30–11:30&nbsp;pm).
         </p>
 
         {recurring.length ? (
@@ -138,43 +138,29 @@ export function AvailabilityManager({
               ))}
             </select>
           </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">Slot length (minutes)</span>
-            <input
-              name="slotDurationMinutes"
-              type="number"
-              min={15}
-              max={180}
-              defaultValue={60}
+          <label className="text-sm sm:col-span-2">
+            <span className="mb-1 block font-medium">Class slot</span>
+            <select
+              value={recurringSlotId}
+              onChange={(e) => setRecurringSlotId(e.target.value)}
               className="w-full rounded-xl border border-slate-200 px-3 py-2"
-            />
+            >
+              {EVENING_BOOKING_SLOTS.map((slot) => (
+                <option key={slot.id} value={slot.id}>
+                  {slot.label}
+                </option>
+              ))}
+            </select>
           </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">From</span>
-            <input
-              name="startTime"
-              type="time"
-              required
-              defaultValue={DEFAULT_WEEKDAY_AVAILABILITY.startTime}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2"
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">Until</span>
-            <input
-              name="endTime"
-              type="time"
-              required
-              defaultValue={DEFAULT_WEEKDAY_AVAILABILITY.endTime}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2"
-            />
-          </label>
+          <input type="hidden" name="startTime" value={recurringSlot?.startTime ?? "20:00"} />
+          <input type="hidden" name="endTime" value={recurringSlot?.endTime ?? "21:00"} />
+          <input type="hidden" name="slotDurationMinutes" value={60} />
           <button
             type="submit"
             disabled={recurringPending}
             className="sm:col-span-2 btn-primary disabled:opacity-50"
           >
-            {recurringPending ? "Adding…" : "Add weekly hours"}
+            {recurringPending ? "Adding…" : "Add weekly slot"}
           </button>
         </form>
       </section>
@@ -234,43 +220,29 @@ export function AvailabilityManager({
               className="w-full rounded-xl border border-slate-200 px-3 py-2"
             />
           </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">Slot length (minutes)</span>
-            <input
-              name="slotDurationMinutes"
-              type="number"
-              min={15}
-              max={180}
-              defaultValue={60}
+          <label className="text-sm sm:col-span-2">
+            <span className="mb-1 block font-medium">Class slot</span>
+            <select
+              value={exceptionSlotId}
+              onChange={(e) => setExceptionSlotId(e.target.value)}
               className="w-full rounded-xl border border-slate-200 px-3 py-2"
-            />
+            >
+              {EVENING_BOOKING_SLOTS.map((slot) => (
+                <option key={slot.id} value={slot.id}>
+                  {slot.label}
+                </option>
+              ))}
+            </select>
           </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">From</span>
-            <input
-              name="startTime"
-              type="time"
-              required
-              defaultValue={DEFAULT_WEEKDAY_AVAILABILITY.startTime}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2"
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">Until</span>
-            <input
-              name="endTime"
-              type="time"
-              required
-              defaultValue={DEFAULT_WEEKDAY_AVAILABILITY.endTime}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2"
-            />
-          </label>
+          <input type="hidden" name="startTime" value={exceptionSlot?.startTime ?? "20:00"} />
+          <input type="hidden" name="endTime" value={exceptionSlot?.endTime ?? "21:00"} />
+          <input type="hidden" name="slotDurationMinutes" value={60} />
           <button
             type="submit"
             disabled={exceptionPending}
             className="sm:col-span-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
           >
-            {exceptionPending ? "Adding…" : "Add date-specific hours"}
+            {exceptionPending ? "Adding…" : "Add date-specific slot"}
           </button>
         </form>
       </section>

@@ -7,6 +7,12 @@ import {
   type TeacherApplicationFormState,
 } from "@/app/actions/teacher-application";
 import {
+  EveningSlotPicker,
+  buildDefaultWeekdaySlotKeys,
+  selectedKeysToSlots,
+} from "@/components/availability/evening-slot-picker";
+import { EVENING_BOOKING_SLOTS } from "@/lib/availability/evening-slots";
+import {
   HEARD_FROM_OPTIONS,
   ID_DOCUMENT_OPTIONS,
   LANGUAGE_MODE_OPTIONS,
@@ -15,12 +21,6 @@ import {
   TEACHING_SUBJECT_OPTIONS,
   TIMEZONE_OPTIONS,
 } from "@/lib/teacher-application/constants";
-import {
-  DEFAULT_WEEKDAY_AVAILABILITY,
-  DEFAULT_WEEKEND_AVAILABILITY,
-  WEEKDAY_LABELS,
-} from "@/lib/availability/constants";
-import type { ProposedAvailabilitySlot } from "@/lib/teacher-application/types";
 import { cn } from "@/lib/utils";
 
 const inputClass =
@@ -30,24 +30,6 @@ const fileInputClass = cn(
   inputClass,
   "file:mr-3 file:rounded-full file:border-0 file:bg-[#0d4f4f] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white",
 );
-
-type DayRow = {
-  dayOfWeek: number;
-  enabled: boolean;
-  startTime: string;
-  endTime: string;
-};
-
-/** Weekdays default to after-work hours; weekends use wider daytime if enabled. */
-const defaultDays: DayRow[] = WEEKDAY_LABELS.map((_, dayOfWeek) => {
-  const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
-  return {
-    dayOfWeek,
-    enabled: isWeekday,
-    startTime: isWeekday ? DEFAULT_WEEKDAY_AVAILABILITY.startTime : DEFAULT_WEEKEND_AVAILABILITY.startTime,
-    endTime: DEFAULT_WEEKDAY_AVAILABILITY.endTime,
-  };
-});
 
 function Field({
   label,
@@ -78,24 +60,30 @@ function FormError({ state }: { state: TeacherApplicationFormState }) {
 
 export function TeacherApplyForm() {
   const [state, action, pending] = useActionState(submitTeacherApplicationAction, teacherApplicationInitialState);
-  const [days, setDays] = useState<DayRow[]>(defaultDays);
   const [timezone, setTimezone] = useState("Asia/Kuala_Lumpur");
   const [photoName, setPhotoName] = useState<string | null>(null);
   const [certName, setCertName] = useState<string | null>(null);
   const [heardFrom, setHeardFrom] = useState("");
   const [idDocumentType, setIdDocumentType] = useState("IC");
+  const [selectedSlotKeys, setSelectedSlotKeys] = useState<Set<string>>(() => buildDefaultWeekdaySlotKeys());
 
-  const proposedAvailabilityJson = useMemo(() => {
-    const slots: ProposedAvailabilitySlot[] = days
-      .filter((d) => d.enabled)
-      .map((d) => ({
-        dayOfWeek: d.dayOfWeek,
-        startTime: d.startTime,
-        endTime: d.endTime,
-        slotDurationMinutes: 60,
-      }));
-    return JSON.stringify({ timezone, slots });
-  }, [days, timezone]);
+  const proposedAvailabilityJson = useMemo(
+    () =>
+      JSON.stringify({
+        timezone,
+        slots: selectedKeysToSlots(selectedSlotKeys),
+      }),
+    [timezone, selectedSlotKeys],
+  );
+
+  function toggleSlot(key: string) {
+    setSelectedSlotKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   return (
     <form action={action} className="space-y-10" encType="multipart/form-data">
@@ -269,55 +257,18 @@ export function TeacherApplyForm() {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-slate-900">Weekly availability</h2>
         <p className="text-sm text-slate-600">
-          Most families book after school or work — weekdays default to 6:00&nbsp;pm–10:00&nbsp;pm. Adjust each day
-          as needed (you can open weekends or earlier slots too). You can change this after approval.
+          Tick the 1-hour slots you are free to teach. Each class is 60 minutes with a 15-minute break before the next
+          slot ({EVENING_BOOKING_SLOTS.map((s) => s.label).join(", ")}). Most teachers choose evening slots after school
+          and work. Weekdays are pre-selected — adjust any day.
         </p>
-        <ul className="space-y-3">
-          {days.map((row, index) => (
-            <li
-              key={row.dayOfWeek}
-              className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3"
-            >
-              <label className="flex min-w-[9rem] items-center gap-2 text-sm font-medium text-slate-800">
-                <input
-                  type="checkbox"
-                  checked={row.enabled}
-                  onChange={(e) => {
-                    const next = [...days];
-                    next[index] = { ...row, enabled: e.target.checked };
-                    setDays(next);
-                  }}
-                  className="h-4 w-4 rounded border-slate-300"
-                />
-                {WEEKDAY_LABELS[row.dayOfWeek]}
-              </label>
-              <input
-                type="time"
-                value={row.startTime}
-                disabled={!row.enabled}
-                onChange={(e) => {
-                  const next = [...days];
-                  next[index] = { ...row, startTime: e.target.value };
-                  setDays(next);
-                }}
-                className={cn(inputClass, "mt-0 w-auto flex-1 sm:max-w-[8rem]", !row.enabled && "opacity-50")}
-              />
-              <span className="text-slate-400">to</span>
-              <input
-                type="time"
-                value={row.endTime}
-                disabled={!row.enabled}
-                onChange={(e) => {
-                  const next = [...days];
-                  next[index] = { ...row, endTime: e.target.value };
-                  setDays(next);
-                }}
-                className={cn(inputClass, "mt-0 w-auto flex-1 sm:max-w-[8rem]", !row.enabled && "opacity-50")}
-              />
-            </li>
-          ))}
-        </ul>
+        <EveningSlotPicker
+          selectedKeys={selectedSlotKeys}
+          onToggle={(key) => toggleSlot(key)}
+        />
         <input type="hidden" name="proposedAvailability" value={proposedAvailabilityJson} readOnly />
+        {selectedSlotKeys.size === 0 ? (
+          <p className="text-sm text-amber-800">Select at least one time slot to continue.</p>
+        ) : null}
       </section>
 
       <section className="space-y-4">
@@ -396,7 +347,7 @@ export function TeacherApplyForm() {
       <div className="flex flex-wrap items-center gap-4 border-t border-slate-200 pt-6">
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || selectedSlotKeys.size === 0}
           className="rounded-full bg-[#c5a059] px-8 py-3.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-[#b8924f] disabled:opacity-60"
         >
           {pending ? "Submitting…" : "Submit application"}
