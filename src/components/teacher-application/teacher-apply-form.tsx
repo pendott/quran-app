@@ -257,9 +257,8 @@ export function TeacherApplyForm() {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-slate-900">Weekly availability</h2>
         <p className="text-sm text-slate-600">
-          Tick the 1-hour slots you are free to teach. Each class is 60 minutes with a 15-minute break before the next
-          slot ({EVENING_BOOKING_SLOTS.map((s) => s.label).join(", ")}). Most teachers choose evening slots after school
-          and work. Weekdays are pre-selected — adjust any day.
+          Tick every 1-hour slot you are free to teach (60-minute class, 15-minute break before the next slot). Weekdays
+          pre-select evening hours from 6:00&nbsp;PM — change any day or add morning and afternoon slots.
         </p>
         <EveningSlotPicker
           selectedKeys={selectedSlotKeys}

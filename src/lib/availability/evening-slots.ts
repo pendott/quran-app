@@ -21,14 +21,14 @@ function timeFromMinutes(total: number) {
 function format12h(hhmm: string) {
   const [h, m] = hhmm.split(":").map(Number);
   const hour = h ?? 0;
-  const suffix = hour >= 12 ? "pm" : "am";
+  const suffix = hour >= 12 ? "PM" : "AM";
   const h12 = hour % 12 === 0 ? 12 : hour % 12;
-  return `${h12}:${String(m ?? 0).padStart(2, "0")}${suffix}`;
+  return `${h12}:${String(m ?? 0).padStart(2, "0")} ${suffix}`;
 }
 
 /**
- * Evening slots from 8:00 pm in the pattern 8–9, 9:15–10:15, 10:30–11:30, …
- * Stops when the next slot would end after `lastEndTime` (default 11:30 pm).
+ * Full-day slots: 8:00 AM – 9:00 AM, 9:15 AM – 10:15 AM, … 9:45 PM – 10:45 PM
+ * (60-minute class, 15-minute break between slots).
  */
 export function buildEveningSlotTemplates(options?: {
   firstStartTime?: string;
@@ -36,10 +36,8 @@ export function buildEveningSlotTemplates(options?: {
   durationMinutes?: number;
   gapMinutes?: number;
 }): EveningSlotTemplate[] {
-  const firstStartTime = options?.firstStartTime ?? "20:00";
-  /** Last class ends at 11:30 pm (10:30–11:30 slot). */
-  /** No class may end after this time (default 11:00 pm). */
-  const lastEndTime = options?.lastEndTime ?? "23:00";
+  const firstStartTime = options?.firstStartTime ?? "08:00";
+  const lastEndTime = options?.lastEndTime ?? "22:45";
   const durationMinutes = options?.durationMinutes ?? 60;
   const gapMinutes = options?.gapMinutes ?? 15;
 
@@ -60,23 +58,15 @@ export function buildEveningSlotTemplates(options?: {
     start = end + gapMinutes;
   }
 
-  // Pattern may land at 10:30–11:30 pm; when capping at 11 pm, offer 10:00–11:00 pm instead.
-  const hasTenToEleven = slots.some((s) => s.startTime === "22:00" && s.endTime === "23:00");
-  if (!hasTenToEleven && lastEnd >= minutesFromTime("23:00")) {
-    slots.push({
-      id: "22:00-23:00",
-      startTime: "22:00",
-      endTime: "23:00",
-      label: `${format12h("22:00")} – ${format12h("23:00")}`,
-    });
-  }
-
-  return slots.sort((a, b) => a.startTime.localeCompare(b.startTime));
+  return slots;
 }
 
 export const EVENING_BOOKING_SLOTS = buildEveningSlotTemplates();
 
-export const DEFAULT_WEEKDAY_EVENING_SLOT_IDS = EVENING_BOOKING_SLOTS.map((s) => s.id);
+/** Pre-select after-school / evening slots on weekdays (6:00 PM onwards). */
+export const DEFAULT_WEEKDAY_EVENING_SLOT_IDS = EVENING_BOOKING_SLOTS.filter(
+  (s) => minutesFromTime(s.startTime) >= 18 * 60,
+).map((s) => s.id);
 
 export function slotKey(dayOfWeek: number, startTime: string, endTime: string) {
   return `${dayOfWeek}:${startTime}-${endTime}`;

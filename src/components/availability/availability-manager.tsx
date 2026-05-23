@@ -83,8 +83,8 @@ export function AvailabilityManager({
       <section className="rounded-[24px] border border-slate-200 bg-white p-6">
         <h2 className="text-base font-semibold text-slate-900">Weekly schedule</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Repeats every week. Pick 1-hour slots with a 15-minute break between classes (e.g. 8:00–9:00&nbsp;pm,
-          9:15–10:15&nbsp;pm, 10:30–11:30&nbsp;pm).
+          Repeats every week. Pick 1-hour slots (15-minute break between classes), from 8:00&nbsp;AM through
+          9:45–10:45&nbsp;PM.
         </p>
 
         {recurring.length ? (
