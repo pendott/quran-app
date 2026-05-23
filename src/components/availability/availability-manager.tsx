@@ -7,7 +7,12 @@ import {
   type AvailabilityFormState,
 } from "@/app/actions/availability";
 import { deleteAvailabilityAction } from "@/app/actions/availability";
-import { formatWeekday, monthNavigation, WEEKDAY_LABELS } from "@/lib/availability/constants";
+import {
+  DEFAULT_WEEKDAY_AVAILABILITY,
+  formatWeekday,
+  monthNavigation,
+  WEEKDAY_LABELS,
+} from "@/lib/availability/constants";
 
 type RecurringRow = {
   id: string;
@@ -77,7 +82,10 @@ export function AvailabilityManager({
 
       <section className="rounded-[24px] border border-slate-200 bg-white p-6">
         <h2 className="text-base font-semibold text-slate-900">Weekly schedule</h2>
-        <p className="mt-1 text-sm text-slate-600">Repeats every week. Parents see bookable slots from these hours.</p>
+        <p className="mt-1 text-sm text-slate-600">
+          Repeats every week. Parents see bookable slots from these hours. Defaults suggest 6:00&nbsp;pm–10:00&nbsp;pm
+          for after school and work.
+        </p>
 
         {recurring.length ? (
           <ul className="mt-4 divide-y divide-slate-100">
@@ -143,11 +151,23 @@ export function AvailabilityManager({
           </label>
           <label className="text-sm">
             <span className="mb-1 block font-medium">From</span>
-            <input name="startTime" type="time" required defaultValue="09:00" className="w-full rounded-xl border border-slate-200 px-3 py-2" />
+            <input
+              name="startTime"
+              type="time"
+              required
+              defaultValue={DEFAULT_WEEKDAY_AVAILABILITY.startTime}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2"
+            />
           </label>
           <label className="text-sm">
             <span className="mb-1 block font-medium">Until</span>
-            <input name="endTime" type="time" required defaultValue="17:00" className="w-full rounded-xl border border-slate-200 px-3 py-2" />
+            <input
+              name="endTime"
+              type="time"
+              required
+              defaultValue={DEFAULT_WEEKDAY_AVAILABILITY.endTime}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2"
+            />
           </label>
           <button
             type="submit"
@@ -227,11 +247,23 @@ export function AvailabilityManager({
           </label>
           <label className="text-sm">
             <span className="mb-1 block font-medium">From</span>
-            <input name="startTime" type="time" required defaultValue="09:00" className="w-full rounded-xl border border-slate-200 px-3 py-2" />
+            <input
+              name="startTime"
+              type="time"
+              required
+              defaultValue={DEFAULT_WEEKDAY_AVAILABILITY.startTime}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2"
+            />
           </label>
           <label className="text-sm">
             <span className="mb-1 block font-medium">Until</span>
-            <input name="endTime" type="time" required defaultValue="12:00" className="w-full rounded-xl border border-slate-200 px-3 py-2" />
+            <input
+              name="endTime"
+              type="time"
+              required
+              defaultValue={DEFAULT_WEEKDAY_AVAILABILITY.endTime}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2"
+            />
           </label>
           <button
             type="submit"

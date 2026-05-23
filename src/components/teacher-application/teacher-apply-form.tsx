@@ -15,7 +15,11 @@ import {
   TEACHING_SUBJECT_OPTIONS,
   TIMEZONE_OPTIONS,
 } from "@/lib/teacher-application/constants";
-import { WEEKDAY_LABELS } from "@/lib/availability/constants";
+import {
+  DEFAULT_WEEKDAY_AVAILABILITY,
+  DEFAULT_WEEKEND_AVAILABILITY,
+  WEEKDAY_LABELS,
+} from "@/lib/availability/constants";
 import type { ProposedAvailabilitySlot } from "@/lib/teacher-application/types";
 import { cn } from "@/lib/utils";
 
@@ -34,12 +38,16 @@ type DayRow = {
   endTime: string;
 };
 
-const defaultDays: DayRow[] = WEEKDAY_LABELS.map((_, dayOfWeek) => ({
-  dayOfWeek,
-  enabled: dayOfWeek >= 1 && dayOfWeek <= 5,
-  startTime: "09:00",
-  endTime: "17:00",
-}));
+/** Weekdays default to after-work hours; weekends use wider daytime if enabled. */
+const defaultDays: DayRow[] = WEEKDAY_LABELS.map((_, dayOfWeek) => {
+  const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+  return {
+    dayOfWeek,
+    enabled: isWeekday,
+    startTime: isWeekday ? DEFAULT_WEEKDAY_AVAILABILITY.startTime : DEFAULT_WEEKEND_AVAILABILITY.startTime,
+    endTime: DEFAULT_WEEKDAY_AVAILABILITY.endTime,
+  };
+});
 
 function Field({
   label,
@@ -261,7 +269,8 @@ export function TeacherApplyForm() {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-slate-900">Weekly availability</h2>
         <p className="text-sm text-slate-600">
-          Choose the days and hours families can book you. You can adjust this later after approval.
+          Most families book after school or work — weekdays default to 6:00&nbsp;pm–10:00&nbsp;pm. Adjust each day
+          as needed (you can open weekends or earlier slots too). You can change this after approval.
         </p>
         <ul className="space-y-3">
           {days.map((row, index) => (

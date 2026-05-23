@@ -1,5 +1,16 @@
 export const WEEKDAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
 
+/** Suggested defaults: after work/school on weekdays, up to 10pm. */
+export const DEFAULT_WEEKDAY_AVAILABILITY = {
+  startTime: "18:00",
+  endTime: "22:00",
+} as const;
+
+export const DEFAULT_WEEKEND_AVAILABILITY = {
+  startTime: "10:00",
+  endTime: "22:00",
+} as const;
+
 export function formatWeekday(dayOfWeek: number) {
   return WEEKDAY_LABELS[dayOfWeek] ?? `Day ${dayOfWeek}`;
 }
