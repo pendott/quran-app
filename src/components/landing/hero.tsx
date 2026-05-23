@@ -35,8 +35,8 @@ export function Hero() {
               Start learning today
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
-            <Link href="/login?callbackUrl=%2Fteacher" className={brandUi.btnSecondary}>
-              I&apos;m a teacher
+            <Link href="/teach/apply" className={brandUi.btnSecondary}>
+              Apply to teach
             </Link>
           </div>
           <ul className={cn("mt-10 flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:gap-x-8", brandUi.muted)}>

@@ -40,7 +40,7 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/login?callbackUrl=%2Fteacher" className="hover:text-white">
+                <Link href="/teach/apply" className="hover:text-white">
                   Teacher
                 </Link>
               </li>

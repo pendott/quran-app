@@ -110,6 +110,17 @@ enum AvailabilityType {
   EXCEPTION
 }
 
+enum TeacherApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum IdDocumentType {
+  IC
+  PASSPORT
+}
+
 model User {
   id             String          @id @default(cuid())
   name           String?
@@ -141,6 +152,16 @@ model Teacher {
   userId              String                    @unique
   bio                 String?
   headline            String?
+  age                 Int?
+  legalName           String?
+  idDocumentType      IdDocumentType?
+  idDocumentNumber    String?
+  qualifications      String?                   @db.Text
+  teachingSubjects    Json?
+  studentLevels       Json?
+  languages           Json?
+  certificationPath   String?
+  maxStudentsPerWeek  Int?
   timezone            String                    @default("Asia/Kuala_Lumpur")
   experienceYears     Int                       @default(0)
   maxStudents         Int                       @default(20)
@@ -154,6 +175,45 @@ model Teacher {
   bookings            Booking[]
   classSessions       ClassSession[]
   classNotes          ClassNote[]
+  application         TeacherApplication?       @relation("ApplicationTeacher")
+}
+
+model TeacherApplication {
+  id                     String                   @id @default(cuid())
+  email                  String
+  name                   String
+  legalName              String
+  idDocumentType         IdDocumentType
+  idDocumentNumber       String
+  phone                  String?
+  age                    Int
+  qualifications         String                   @db.Text
+  experienceYears        Int
+  about                  String                   @db.Text
+  photoPath              String?
+  certificationPath      String?
+  teachingSubjects       Json
+  studentLevels          Json
+  languages              Json
+  maxStudentsPerWeek     Int
+  heardFrom              String
+  heardFromOther         String?
+  proposedAvailability   Json
+  timezone               String                   @default("Asia/Kuala_Lumpur")
+  confirmedAccurate      Boolean                  @default(false)
+  confirmedCodeOfConduct Boolean                  @default(false)
+  consentBackgroundCheck Boolean                  @default(false)
+  status                 TeacherApplicationStatus @default(PENDING)
+  reviewedAt           DateTime?
+  reviewedByUserId     String?
+  rejectionReason      String?                  @db.Text
+  createdTeacherId     String?                  @unique
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  createdTeacher       Teacher?                 @relation("ApplicationTeacher", fields: [createdTeacherId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([email])
 }
 
 model Student {

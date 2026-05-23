@@ -25,7 +25,13 @@ export default async function LoginPage() {
               <LoginForm />
             </Suspense>
           </div>
-          <div className="mt-6 text-center">
+          <p className="mt-6 text-center text-sm text-slate-600">
+            Want to teach on jomngaji.my?{" "}
+            <Link href="/teach/apply" className="font-semibold text-[#0d4f4f] hover:underline">
+              Apply as a teacher
+            </Link>
+          </p>
+          <div className="mt-4 text-center">
             <Link
               href="/"
               className="inline-flex rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
