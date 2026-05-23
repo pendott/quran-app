@@ -4,14 +4,20 @@ import { createElement } from "react";
 import { prisma } from "@/lib/db";
 import { meetingJoinLinkCell } from "@/components/dashboard/meeting-join-link";
 import { formatDateTime } from "@/lib/format";
-import { isDatabaseUnavailable } from "@/server/db-guard";
+import { isDatabaseUnavailable, isPrismaQueryError } from "@/server/db-guard";
 import type { Stat, TableRow } from "@/lib/types";
 
 export async function getTeacherByUserId(userId: string) {
-  return prisma.teacher.findUnique({
-    where: { userId },
-    include: { user: true },
-  });
+  try {
+    return await prisma.teacher.findUnique({
+      where: { userId },
+      include: { user: true },
+    });
+  } catch (error) {
+    if (isPrismaQueryError(error)) throw error;
+    console.error("getTeacherByUserId", error);
+    return null;
+  }
 }
 
 export async function getTeacherStudentsTable(teacherId: string): Promise<{ rows: TableRow[]; dbError: boolean }> {
@@ -66,7 +72,7 @@ export async function getTeacherClassesTable(teacherId: string): Promise<{ rows:
     const rows: TableRow[] = sessions.map((cs) => ({
       Time: formatDateTime(cs.scheduledStartAt),
       Student: cs.student.displayName,
-      Topic: cs.booking.pricingRuleId ? "Scheduled" : "Class",
+      Topic: cs.booking?.pricingRuleId ? "Scheduled" : "Class",
       "Zoom / join": meetingJoinLinkCell(
         cs.meetingLink?.joinUrl,
         cs.meetingLink?.provider,
@@ -109,7 +115,7 @@ export async function getTeacherTodaySessionsTable(teacherId: string): Promise<{
     const rows: TableRow[] = sessions.map((cs) => ({
       Time: formatDateTime(cs.scheduledStartAt),
       Student: cs.student.displayName,
-      Topic: cs.booking.pricingRuleId ? "Scheduled" : "Class",
+      Topic: cs.booking?.pricingRuleId ? "Scheduled" : "Class",
       "Zoom / join": meetingJoinLinkCell(
         cs.meetingLink?.joinUrl,
         cs.meetingLink?.provider,

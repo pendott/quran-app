@@ -9,3 +9,20 @@ export function isDatabaseUnavailable(error: unknown): boolean {
   }
   return false;
 }
+
+/** Table/column missing — run `prisma migrate deploy` on the server. */
+export function isSchemaOutOfDate(error: unknown): boolean {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return ["P2021", "P2022"].includes(error.code);
+  }
+  return false;
+}
+
+export function isPrismaQueryError(error: unknown): boolean {
+  return (
+    isDatabaseUnavailable(error) ||
+    isSchemaOutOfDate(error) ||
+    error instanceof Prisma.PrismaClientKnownRequestError ||
+    error instanceof Prisma.PrismaClientValidationError
+  );
+}

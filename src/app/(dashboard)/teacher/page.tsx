@@ -5,6 +5,8 @@ import { DbBanner } from "@/components/dashboard/db-banner";
 import { DataTable } from "@/components/dashboard/data-table";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { autoCompletePastSessionsForTeacher } from "@/server/booking/auto-complete-past-sessions";
+import { isSchemaOutOfDate } from "@/server/db-guard";
 import {
   getTeacherByUserId,
   getTeacherDashboardStats,
@@ -13,14 +15,41 @@ import {
 
 export default async function TeacherDashboardPage() {
   const session = await auth();
-  const teacher = session?.user?.id ? await getTeacherByUserId(session.user.id) : null;
+  let teacher = null;
+  try {
+    teacher = session?.user?.id ? await getTeacherByUserId(session.user.id) : null;
+  } catch (error) {
+    if (isSchemaOutOfDate(error)) {
+      return (
+        <SectionCard title="Database update required" description="The app was upgraded but the database schema was not.">
+          <p className="text-sm text-slate-600">
+            On the server run:{" "}
+            <code className="rounded bg-slate-100 px-1.5 py-0.5">docker compose exec web npx prisma migrate deploy</code>
+            , then restart the web container.
+          </p>
+        </SectionCard>
+      );
+    }
+    throw error;
+  }
 
   if (!teacher) {
     return (
       <SectionCard title="Teacher profile" description="No teacher profile is linked to this account.">
-        <p className="text-sm text-slate-600">Sign in as teacher@demo.local after running the seed.</p>
+        <p className="text-sm text-slate-600">
+          If you were just approved as a teacher, sign out and sign in again with the password from the admin team.
+        </p>
+        <p className="mt-2 text-sm text-slate-600">
+          For local demo: sign in as <strong>teacher@demo.local</strong> after running the seed.
+        </p>
       </SectionCard>
     );
+  }
+
+  try {
+    await autoCompletePastSessionsForTeacher(teacher.id);
+  } catch (error) {
+    console.error("autoCompletePastSessionsForTeacher", error);
   }
 
   const [{ stats, dbError }, { rows: todayRows, dbError: todayErr }] = await Promise.all([

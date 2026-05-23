@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { z } from "zod";
+import { UserStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import type { UserRole } from "@/lib/types";
 
@@ -45,6 +46,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const isPasswordValid = await compare(parsed.data.password, user.passwordHash);
 
         if (!isPasswordValid) {
+          return null;
+        }
+
+        if (user.status !== UserStatus.ACTIVE) {
           return null;
         }
 
