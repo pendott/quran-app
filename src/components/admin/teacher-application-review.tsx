@@ -52,7 +52,8 @@ export function TeacherApplicationReview({ application }: Props) {
     <div className="space-y-8">
       {approveState.ok ? (
         <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Teacher account created. Share the password you set with {application.email}.
+          Teacher account created and approval email sent to {application.email}. Share the login password you set
+          with them if they have not received it yet.
           {application.createdTeacherId ? (
             <>
               {" "}
@@ -65,7 +66,7 @@ export function TeacherApplicationReview({ application }: Props) {
       ) : null}
       {rejectState.ok ? (
         <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
-          Application marked as rejected.
+          Application marked as rejected. A notification email was sent to {application.email}.
         </p>
       ) : null}
 

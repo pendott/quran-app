@@ -6,6 +6,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { approveTeacherApplication } from "@/server/teacher-application/approve";
+import { sendTeacherApplicationRejectedEmail } from "@/server/teacher-application/emails";
 
 export type AdminApplicationActionState = { ok: boolean; error: string | null; tempPassword?: string };
 
@@ -89,14 +90,22 @@ export async function adminRejectTeacherApplicationAction(
     return { ok: false, error: "Application already reviewed" };
   }
 
+  const rejectionReason = parsed.data.rejectionReason?.trim() || null;
+
   await prisma.teacherApplication.update({
     where: { id: application.id },
     data: {
       status: TeacherApplicationStatus.REJECTED,
       reviewedAt: new Date(),
       reviewedByUserId: session.user.id,
-      rejectionReason: parsed.data.rejectionReason?.trim() || null,
+      rejectionReason,
     },
+  });
+
+  void sendTeacherApplicationRejectedEmail({
+    to: application.email,
+    name: application.name,
+    rejectionReason,
   });
 
   revalidatePath("/admin/teacher-applications");

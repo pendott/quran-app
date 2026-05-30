@@ -2,6 +2,7 @@ import { UserRole, UserStatus } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/db";
 import type { ProposedAvailability } from "@/lib/teacher-application/types";
+import { sendTeacherApplicationApprovedEmail } from "@/server/teacher-application/emails";
 
 export async function approveTeacherApplication(params: {
   applicationId: string;
@@ -90,6 +91,8 @@ export async function approveTeacherApplication(params: {
 
     return teacherRecord;
   });
+
+  void sendTeacherApplicationApprovedEmail({ to: email, name: application.name });
 
   return { teacherId: teacher.id };
 }

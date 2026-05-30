@@ -12,8 +12,8 @@ export default function TeachApplySuccessPage() {
         <Logo variant="full" surface="transparent" href="/" className="mx-auto max-w-[180px]" />
         <h1 className="mt-8 text-2xl font-semibold text-slate-900">Thank you!</h1>
         <p className="mt-4 text-sm leading-7 text-slate-600">
-          Your teacher application has been received. We will review your profile and contact you at the email you
-          provided. Once approved, you can sign in with the password our team sends you.
+          Your teacher application has been received. We sent a confirmation to your email and will review your
+          profile. Once approved, you can sign in with the password our team shares with you.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link

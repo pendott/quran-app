@@ -8,6 +8,7 @@ import {
   parseTeachingSubjectsFromForm,
   teacherApplicationSchema,
 } from "@/server/teacher-application/parse-form";
+import { sendTeacherApplicationReceivedEmail } from "@/server/teacher-application/emails";
 import {
   saveTeacherApplicationCertification,
   saveTeacherApplicationPhoto,
@@ -115,11 +116,13 @@ async function processTeacherApplication(
     return { ok: false, error: savedCert.error ?? "Could not save certification" };
   }
 
+  const applicantName = parsed.data.name.trim();
+
   await prisma.teacherApplication.create({
     data: {
       id: applicationId,
       email,
-      name: parsed.data.name.trim(),
+      name: applicantName,
       legalName: parsed.data.legalName.trim(),
       idDocumentType: parsed.data.idDocumentType,
       idDocumentNumber: parsed.data.idDocumentNumber,
@@ -143,6 +146,8 @@ async function processTeacherApplication(
       consentBackgroundCheck: true,
     },
   });
+
+  void sendTeacherApplicationReceivedEmail({ to: email, name: applicantName });
 
   return { ok: true, error: null };
 }
