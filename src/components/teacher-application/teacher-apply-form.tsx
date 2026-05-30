@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import {
   submitTeacherApplicationAction,
   teacherApplicationInitialState,
@@ -59,6 +60,7 @@ function FormError({ state }: { state: TeacherApplicationFormState }) {
 }
 
 export function TeacherApplyForm() {
+  const router = useRouter();
   const [state, action, pending] = useActionState(submitTeacherApplicationAction, teacherApplicationInitialState);
   const [timezone, setTimezone] = useState("Asia/Kuala_Lumpur");
   const [photoName, setPhotoName] = useState<string | null>(null);
@@ -84,6 +86,12 @@ export function TeacherApplyForm() {
       return next;
     });
   }
+
+  useEffect(() => {
+    if (state.ok) {
+      router.push("/teach/apply/success");
+    }
+  }, [state.ok, router]);
 
   return (
     <form action={action} className="space-y-10" encType="multipart/form-data">

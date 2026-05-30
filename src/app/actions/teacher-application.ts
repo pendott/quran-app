@@ -1,8 +1,8 @@
 "use server";
 
 import { TeacherApplicationStatus } from "@prisma/client";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { isSchemaOutOfDate } from "@/server/db-guard";
 import {
   parseLanguagesFromForm,
   parseProposedAvailabilityJson,
@@ -21,12 +21,19 @@ export type TeacherApplicationFormState = {
   fieldErrors?: Record<string, string>;
 };
 
-const initialError: TeacherApplicationFormState = { ok: false, error: null };
-
 export async function submitTeacherApplicationAction(
   _prev: TeacherApplicationFormState,
   formData: FormData,
 ): Promise<TeacherApplicationFormState> {
+  try {
+    return await submitTeacherApplication(formData);
+  } catch (error) {
+    console.error("submitTeacherApplicationAction", error);
+    return { ok: false, error: "Something went wrong. Please try again or use smaller photo files." };
+  }
+}
+
+async function submitTeacherApplication(formData: FormData): Promise<TeacherApplicationFormState> {
   const proposedAvailability = parseProposedAvailabilityJson(
     String(formData.get("proposedAvailability") ?? ""),
   );
@@ -133,10 +140,18 @@ export async function submitTeacherApplicationAction(
     });
   } catch (e) {
     console.error(e);
+    if (isSchemaOutOfDate(e)) {
+      return {
+        ok: false,
+        error: "The server database is not up to date. Ask the site admin to run prisma migrate deploy.",
+      };
+    }
     return { ok: false, error: "Could not save your application. Please try again." };
   }
 
-  redirect("/teach/apply/success");
+  return { ok: true, error: null };
 }
+
+const initialError: TeacherApplicationFormState = { ok: false, error: null };
 
 export { initialError as teacherApplicationInitialState };

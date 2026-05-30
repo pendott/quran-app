@@ -16,18 +16,23 @@ const extByMime: Record<string, string> = {
 };
 
 async function saveFile(file: File, applicationId: string, prefix: "photo" | "cert") {
-  const dir = path.join(process.cwd(), "public", "uploads", "teacher-applications");
-  await mkdir(dir, { recursive: true });
+  try {
+    const dir = path.join(process.cwd(), "public", "uploads", "teacher-applications");
+    await mkdir(dir, { recursive: true });
 
-  const safeId = applicationId.replace(/[^a-zA-Z0-9_-]/g, "");
-  const ext = extByMime[file.type];
-  if (!ext) return { error: "Unsupported file type" as const };
+    const safeId = applicationId.replace(/[^a-zA-Z0-9_-]/g, "");
+    const ext = extByMime[file.type];
+    if (!ext) return { error: "Unsupported file type" as const };
 
-  const filename = `${safeId}-${prefix}-${randomBytes(4).toString("hex")}.${ext}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(dir, filename), buffer);
+    const filename = `${safeId}-${prefix}-${randomBytes(4).toString("hex")}.${ext}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await writeFile(path.join(dir, filename), buffer);
 
-  return { path: `/uploads/teacher-applications/${filename}` as const };
+    return { path: `/uploads/teacher-applications/${filename}` as const };
+  } catch (error) {
+    console.error("saveTeacherApplicationFile", error);
+    return { error: "Could not save uploaded file on the server" as const };
+  }
 }
 
 export async function saveTeacherApplicationPhoto(file: File, applicationId: string) {

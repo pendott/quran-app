@@ -17,6 +17,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - teacher_uploads:/app/public/uploads
 
   # One-shot: sync schema + demo users (run after pull/rebuild if login fails).
   db-setup:
@@ -52,3 +54,4 @@ services:
 
 volumes:
   postgres_data:
+  teacher_uploads:
