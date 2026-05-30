@@ -69,11 +69,24 @@ export const DEFAULT_WEEKDAY_EVENING_SLOT_IDS = EVENING_BOOKING_SLOTS.filter(
 ).map((s) => s.id);
 
 export function slotKey(dayOfWeek: number, startTime: string, endTime: string) {
-  return `${dayOfWeek}:${startTime}-${endTime}`;
+  // Use | so HH:MM times are not split on ":"
+  return `${dayOfWeek}|${startTime}|${endTime}`;
 }
 
 export function parseSlotKey(key: string) {
-  const [dayStr, times] = key.split(":");
-  const [startTime, endTime] = times.split("-");
+  const parts = key.split("|");
+  if (parts.length !== 3) {
+    // Legacy keys: "1:20:00-21:00" (day + start-end with colons in times)
+    const legacy = key.match(/^(\d):(\d{2}:\d{2})-(\d{2}:\d{2})$/);
+    if (legacy) {
+      return {
+        dayOfWeek: Number(legacy[1]),
+        startTime: legacy[2],
+        endTime: legacy[3],
+      };
+    }
+    throw new Error(`Invalid slot key: ${key}`);
+  }
+  const [dayStr, startTime, endTime] = parts;
   return { dayOfWeek: Number(dayStr), startTime, endTime };
 }

@@ -4,6 +4,7 @@ import { WEEKDAY_LABELS } from "@/lib/availability/constants";
 import {
   DEFAULT_WEEKDAY_EVENING_SLOT_IDS,
   EVENING_BOOKING_SLOTS,
+  parseSlotKey,
   slotKey,
   type EveningSlotTemplate,
 } from "@/lib/availability/evening-slots";
@@ -77,10 +78,9 @@ export function buildDefaultWeekdaySlotKeys() {
 
 export function selectedKeysToSlots(keys: Set<string>): SelectedEveningSlot[] {
   return [...keys].map((key) => {
-    const [dayStr, times] = key.split(":");
-    const [startTime, endTime] = times.split("-");
+    const { dayOfWeek, startTime, endTime } = parseSlotKey(key);
     return {
-      dayOfWeek: Number(dayStr),
+      dayOfWeek,
       startTime,
       endTime,
       slotDurationMinutes: 60,
