@@ -30,6 +30,8 @@ export function labelLanguageMode(id: string) {
     arabic: "Arabic",
     urdu: "Urdu",
     indonesian: "Bahasa Indonesia",
+    mandarin: "Mandarin",
+    hokkien: "Hokkien",
   };
   return map[id] ?? id;
 }

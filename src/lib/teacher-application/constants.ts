@@ -25,6 +25,8 @@ export const LANGUAGE_MODE_OPTIONS = [
   { id: "arabic", label: "Arabic" },
   { id: "urdu", label: "Urdu" },
   { id: "indonesian", label: "Bahasa Indonesia" },
+  { id: "mandarin", label: "Mandarin" },
+  { id: "hokkien", label: "Hokkien" },
 ] as const;
 
 export const ID_DOCUMENT_OPTIONS = [
