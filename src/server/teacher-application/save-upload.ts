@@ -15,13 +15,26 @@ const extByMime: Record<string, string> = {
   "application/pdf": "pdf",
 };
 
+function inferMimeType(file: File): string | null {
+  if (file.type) return file.type;
+  const lower = file.name.toLowerCase();
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".pdf")) return "application/pdf";
+  return null;
+}
+
 async function saveFile(file: File, applicationId: string, prefix: "photo" | "cert") {
   try {
+    const mime = inferMimeType(file);
+    if (!mime) return { error: "Unsupported file type" as const };
+
     const dir = path.join(process.cwd(), "public", "uploads", "teacher-applications");
     await mkdir(dir, { recursive: true });
 
     const safeId = applicationId.replace(/[^a-zA-Z0-9_-]/g, "");
-    const ext = extByMime[file.type];
+    const ext = extByMime[mime];
     if (!ext) return { error: "Unsupported file type" as const };
 
     const filename = `${safeId}-${prefix}-${randomBytes(4).toString("hex")}.${ext}`;
@@ -38,7 +51,8 @@ async function saveFile(file: File, applicationId: string, prefix: "photo" | "ce
 export async function saveTeacherApplicationPhoto(file: File, applicationId: string) {
   if (!file.size) return { error: "Profile photo is required" as const };
   if (file.size > PHOTO_MAX_BYTES) return { error: "Photo must be 2 MB or smaller" as const };
-  if (!photoMimes.has(file.type)) return { error: "Use a JPG, PNG, or WebP photo" as const };
+  const mime = inferMimeType(file);
+  if (!mime || !photoMimes.has(mime)) return { error: "Use a JPG, PNG, or WebP photo" as const };
 
   const saved = await saveFile(file, applicationId, "photo");
   if ("error" in saved) return { error: saved.error };
@@ -48,7 +62,8 @@ export async function saveTeacherApplicationPhoto(file: File, applicationId: str
 export async function saveTeacherApplicationCertification(file: File, applicationId: string) {
   if (!file.size) return { error: "Ijazah or certification upload is required" as const };
   if (file.size > CERT_MAX_BYTES) return { error: "Certification file must be 5 MB or smaller" as const };
-  if (!certMimes.has(file.type)) return { error: "Use a PDF, JPG, PNG, or WebP file" as const };
+  const mime = inferMimeType(file);
+  if (!mime || !certMimes.has(mime)) return { error: "Use a PDF, JPG, PNG, or WebP file" as const };
 
   const saved = await saveFile(file, applicationId, "cert");
   if ("error" in saved) return { error: saved.error };

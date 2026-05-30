@@ -4,8 +4,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
     serverActions: {
-      // Profile photo (2 MB) + certification (5 MB) + form fields
-      bodySizeLimit: "8mb",
+      bodySizeLimit: "15mb",
     },
   },
   async redirects() {

@@ -1,12 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useMemo, useState } from "react";
-import {
-  submitTeacherApplicationAction,
-  teacherApplicationInitialState,
-  type TeacherApplicationFormState,
-} from "@/app/actions/teacher-application";
+import { useMemo, useState, type FormEvent } from "react";
 import {
   EveningSlotPicker,
   buildDefaultWeekdaySlotKeys,
@@ -50,18 +45,19 @@ function Field({
   );
 }
 
-function FormError({ state }: { state: TeacherApplicationFormState }) {
-  if (!state.error) return null;
+function FormError({ message }: { message: string | null }) {
+  if (!message) return null;
   return (
     <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-      {state.error}
+      {message}
     </p>
   );
 }
 
 export function TeacherApplyForm() {
   const router = useRouter();
-  const [state, action, pending] = useActionState(submitTeacherApplicationAction, teacherApplicationInitialState);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [timezone, setTimezone] = useState("Asia/Kuala_Lumpur");
   const [photoName, setPhotoName] = useState<string | null>(null);
   const [certName, setCertName] = useState<string | null>(null);
@@ -87,15 +83,48 @@ export function TeacherApplyForm() {
     });
   }
 
-  useEffect(() => {
-    if (state.ok) {
-      router.push("/teach/apply/success");
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (selectedSlotKeys.size === 0) {
+      setError("Select at least one availability slot.");
+      return;
     }
-  }, [state.ok, router]);
+
+    setPending(true);
+    setError(null);
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("/api/teacher-application", {
+        method: "POST",
+        body: formData,
+      });
+
+      let payload: { ok?: boolean; error?: string | null } = {};
+      try {
+        payload = (await response.json()) as { ok?: boolean; error?: string | null };
+      } catch {
+        payload = {};
+      }
+
+      if (!response.ok || !payload.ok) {
+        setError(payload.error ?? "Could not submit your application. Try smaller files or try again.");
+        return;
+      }
+
+      router.push("/teach/apply/success");
+    } catch {
+      setError("Network error. Check your connection and try again.");
+    } finally {
+      setPending(false);
+    }
+  }
 
   return (
-    <form action={action} className="space-y-10" encType="multipart/form-data">
-      <FormError state={state} />
+    <form onSubmit={handleSubmit} className="space-y-10" encType="multipart/form-data">
+      <FormError message={error} />
 
       <section className="space-y-5">
         <div>
