@@ -92,7 +92,11 @@ export async function approveTeacherApplication(params: {
     return teacherRecord;
   });
 
-  void sendTeacherApplicationApprovedEmail({ to: email, name: application.name });
+  void sendTeacherApplicationApprovedEmail({
+    to: email,
+    name: application.name,
+    password: params.password,
+  });
 
   return { teacherId: teacher.id };
 }

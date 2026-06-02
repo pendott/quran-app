@@ -52,8 +52,7 @@ export function TeacherApplicationReview({ application }: Props) {
     <div className="space-y-8">
       {approveState.ok ? (
         <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Teacher account created and approval email sent to {application.email}. Share the login password you set
-          with them if they have not received it yet.
+          Teacher account created and approval email (including the login password) sent to {application.email}.
           {application.createdTeacherId ? (
             <>
               {" "}
@@ -195,7 +194,7 @@ export function TeacherApplicationReview({ application }: Props) {
             ) : null}
             <input type="hidden" name="applicationId" value={application.id} />
             <label className="block text-sm font-medium text-slate-800">
-              Initial password (share with teacher)
+              Initial password (included in approval email)
               <input
                 name="password"
                 type="text"
