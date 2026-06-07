@@ -31,14 +31,14 @@ export function DashboardShell({
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950">
       <div className="mx-auto grid min-h-screen max-w-[1600px] gap-6 px-4 py-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-6">
-        <aside className="rounded-[32px] border border-[#0d4f4f]/20 bg-[#0d4f4f] p-6 text-white shadow-xl shadow-[#0d4f4f]/20">
+        <aside className="rounded-[32px] border border-[#0d4f4f]/20 bg-[#0d4f4f] p-6 text-slate-200 shadow-xl shadow-[#0d4f4f]/20">
           <Link href="/" className="block">
             <Logo variant="full" surface="pill" className="max-w-[160px]" />
           </Link>
 
-          <div className="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-4">
+          <div className="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-4 text-white">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Signed in as</p>
-            <p className="mt-2 text-base font-semibold">{userName}</p>
+            <p className="mt-2 text-base font-semibold text-white">{userName}</p>
             <p className="mt-1 text-sm text-slate-300">{roleLabel} workspace</p>
             <button
               type="button"
@@ -60,16 +60,21 @@ export function DashboardShell({
                   className={cn(
                     "block rounded-[22px] px-4 py-3 transition",
                     isActive
-                      ? "bg-white text-slate-950 shadow-sm"
-                      : "bg-transparent text-slate-200 hover:bg-white/10",
+                      ? "dashboard-nav-active"
+                      : "text-slate-200 hover:bg-white/10 hover:text-white",
                   )}
                 >
-                  <p className={cn("text-sm font-semibold", isActive ? "text-slate-950" : "text-slate-100")}>
+                  <span className={cn("dashboard-nav-active-title block text-sm font-semibold", !isActive && "text-slate-100")}>
                     {item.label}
-                  </p>
-                  <p className={cn("mt-1 text-xs leading-5", isActive ? "text-slate-600" : "text-slate-400")}>
+                  </span>
+                  <span
+                    className={cn(
+                      "dashboard-nav-active-desc mt-1 block text-xs leading-5",
+                      !isActive && "text-slate-400",
+                    )}
+                  >
                     {item.description}
-                  </p>
+                  </span>
                 </Link>
               );
             })}

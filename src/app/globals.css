@@ -51,4 +51,18 @@ body {
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#9a6b1a] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-[#7d5614] disabled:opacity-50;
   }
+
+  .dashboard-nav-active {
+    background-color: #ffffff;
+    color: #020617 !important;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  }
+
+  .dashboard-nav-active .dashboard-nav-active-title {
+    color: #020617 !important;
+  }
+
+  .dashboard-nav-active .dashboard-nav-active-desc {
+    color: #475569 !important;
+  }
 }
