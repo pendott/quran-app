@@ -1,50 +1,36 @@
 import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import {
+  resolveTeacherApplicationUploadPath,
+  teacherApplicationContentDisposition,
+  teacherApplicationContentType,
+} from "@/server/teacher-application/resolve-upload";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "teacher-applications");
-
-const mimeByExt: Record<string, string> = {
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  webp: "image/webp",
-  pdf: "application/pdf",
-};
-
-function resolveUploadPath(filename: string) {
-  if (!/^[\w.-]+$/.test(filename)) {
-    return null;
-  }
-  const resolved = path.resolve(UPLOAD_DIR, filename);
-  const root = path.resolve(UPLOAD_DIR);
-  if (!resolved.startsWith(`${root}${path.sep}`) && resolved !== root) {
-    return null;
-  }
-  return resolved;
-}
+export const runtime = "nodejs";
 
 export async function GET(_request: Request, context: { params: Promise<{ filename: string }> }) {
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return new NextResponse("Unauthorized", { status: 401 });
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
+    return new NextResponse("Forbidden", { status: 403 });
   }
 
-  const { filename } = await context.params;
-  const filePath = resolveUploadPath(decodeURIComponent(filename));
+  const { filename: rawFilename } = await context.params;
+  const filename = decodeURIComponent(rawFilename);
+  const filePath = resolveTeacherApplicationUploadPath(filename);
   if (!filePath) {
     return new NextResponse("Not found", { status: 404 });
   }
 
   try {
     const data = await readFile(filePath);
-    const ext = filename.split(".").pop()?.toLowerCase() ?? "";
-    const contentType = mimeByExt[ext] ?? "application/octet-stream";
-    return new NextResponse(data, {
+    const contentType = teacherApplicationContentType(filename);
+    return new NextResponse(new Uint8Array(data), {
       headers: {
         "Content-Type": contentType,
+        "Content-Disposition": teacherApplicationContentDisposition(filename, contentType),
         "Cache-Control": "private, max-age=3600",
+        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch {

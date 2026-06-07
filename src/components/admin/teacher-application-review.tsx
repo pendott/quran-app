@@ -27,8 +27,11 @@ type Props = {
     about: string;
     photoPath: string | null;
     photoUrl: string | null;
+    photoMissing: boolean;
     certificationPath: string | null;
     certificationUrl: string | null;
+    certificationMissing: boolean;
+    certificationPreview: "image" | "pdf" | "other" | null;
     timezone: string;
     teachingSubjectLabels: string[];
     studentLevelLabels: string[];
@@ -79,7 +82,7 @@ export function TeacherApplicationReview({ application }: Props) {
             alt={application.name}
             className="h-32 w-32 rounded-2xl border border-slate-200 object-cover"
           />
-        ) : application.photoPath ? (
+        ) : application.photoMissing ? (
           <div className="flex h-32 w-32 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-2 text-center text-xs text-slate-500">
             Photo file missing on server
           </div>
@@ -129,18 +132,40 @@ export function TeacherApplicationReview({ application }: Props) {
       </div>
 
       {application.certificationUrl ? (
-        <section>
-          <h3 className="text-sm font-semibold text-slate-900">Certification file</h3>
-          <a
-            href={application.certificationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-flex text-sm font-semibold text-[#0d4f4f] hover:underline"
-          >
-            View uploaded ijazah / certificate →
-          </a>
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold text-slate-900">Certification file</h3>
+            <a
+              href={application.certificationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-[#0d4f4f] hover:underline"
+            >
+              Open in new tab →
+            </a>
+          </div>
+          {application.certificationPreview === "image" ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={application.certificationUrl}
+              alt={`${application.name} certification`}
+              className="max-h-[520px] w-full max-w-2xl rounded-2xl border border-slate-200 object-contain bg-slate-50"
+            />
+          ) : null}
+          {application.certificationPreview === "pdf" ? (
+            <iframe
+              src={application.certificationUrl}
+              title={`${application.name} certification PDF`}
+              className="h-[min(70vh,640px)] w-full max-w-3xl rounded-2xl border border-slate-200 bg-white"
+            />
+          ) : null}
+          {application.certificationPreview === "other" ? (
+            <p className="text-sm text-slate-600">
+              Preview not available for this file type. Use “Open in new tab” to download it.
+            </p>
+          ) : null}
         </section>
-      ) : application.certificationPath ? (
+      ) : application.certificationMissing ? (
         <section>
           <h3 className="text-sm font-semibold text-slate-900">Certification file</h3>
           <p className="mt-2 text-sm text-slate-500">Uploaded file is no longer on the server.</p>

@@ -5,6 +5,7 @@ import { SectionCard } from "@/components/dashboard/section-card";
 import { TeacherApplicationReview } from "@/components/admin/teacher-application-review";
 import { teacherApplicationFileUrl } from "@/lib/teacher-application/upload-url";
 import { getAdminTeacherApplicationDetail } from "@/server/queries/teacher-applications";
+import { getTeacherApplicationUploadMeta } from "@/server/teacher-application/resolve-upload";
 
 export default async function AdminTeacherApplicationDetailPage({
   params,
@@ -20,6 +21,11 @@ export default async function AdminTeacherApplicationDetailPage({
   if (!application) {
     notFound();
   }
+
+  const [photoMeta, certificationMeta] = await Promise.all([
+    getTeacherApplicationUploadMeta(application.photoPath),
+    getTeacherApplicationUploadMeta(application.certificationPath),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -47,9 +53,14 @@ export default async function AdminTeacherApplicationDetailPage({
             maxStudentsPerWeek: application.maxStudentsPerWeek,
             about: application.about,
             photoPath: application.photoPath,
-            photoUrl: teacherApplicationFileUrl(application.photoPath),
+            photoUrl: photoMeta.exists ? teacherApplicationFileUrl(application.photoPath) : null,
+            photoMissing: !!application.photoPath && !photoMeta.exists,
             certificationPath: application.certificationPath,
-            certificationUrl: teacherApplicationFileUrl(application.certificationPath),
+            certificationUrl: certificationMeta.exists
+              ? teacherApplicationFileUrl(application.certificationPath)
+              : null,
+            certificationMissing: !!application.certificationPath && !certificationMeta.exists,
+            certificationPreview: certificationMeta.exists ? certificationMeta.previewKind : null,
             timezone: application.timezone,
             teachingSubjectLabels: application.teachingSubjectLabels,
             studentLevelLabels: application.studentLevelLabels,
