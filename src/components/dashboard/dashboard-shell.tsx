@@ -67,13 +67,13 @@ export function DashboardShell({
                   )}
                 >
                   <span
-                    className="block text-sm font-semibold"
-                    style={{ color: isActive ? "#ffffff" : "#0f172a" }}
+                    className={cn("block text-sm font-bold", isActive ? "text-white" : "text-slate-950")}
+                    style={{ color: isActive ? "#ffffff" : "#020617" }}
                   >
                     {item.label}
                   </span>
                   <span
-                    className="mt-1 block text-xs leading-5"
+                    className={cn("mt-1 block text-xs leading-5", isActive ? "text-slate-300" : "text-slate-600")}
                     style={{ color: isActive ? "#cbd5e1" : "#475569" }}
                   >
                     {item.description}
