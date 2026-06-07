@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { Logo } from "@/components/brand/logo";
 import { APP_NAME } from "@/lib/brand";
 import type { NavItem } from "@/lib/types";
+import { getActiveNavHref } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 type DashboardShellProps = {
@@ -27,6 +28,7 @@ export function DashboardShell({
   children,
 }: DashboardShellProps) {
   const pathname = usePathname();
+  const activeHref = getActiveNavHref(pathname, navItems);
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950">
@@ -51,7 +53,7 @@ export function DashboardShell({
 
           <nav className="mt-8 space-y-2">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const isActive = item.href === activeHref;
 
               return (
                 <Link
@@ -59,19 +61,18 @@ export function DashboardShell({
                   href={item.href}
                   className={cn(
                     "block rounded-[22px] px-4 py-3 transition",
-                    isActive
-                      ? "dashboard-nav-active"
-                      : "text-slate-200 hover:bg-white/10 hover:text-white",
+                    isActive ? "bg-white shadow-sm" : "text-slate-100 hover:bg-white/10",
                   )}
                 >
-                  <span className={cn("dashboard-nav-active-title block text-sm font-semibold", !isActive && "text-slate-100")}>
+                  <span
+                    className={cn("block text-sm font-semibold", !isActive && "text-slate-100")}
+                    style={isActive ? { color: "#020617" } : undefined}
+                  >
                     {item.label}
                   </span>
                   <span
-                    className={cn(
-                      "dashboard-nav-active-desc mt-1 block text-xs leading-5",
-                      !isActive && "text-slate-400",
-                    )}
+                    className={cn("mt-1 block text-xs leading-5", !isActive && "text-slate-400")}
+                    style={isActive ? { color: "#475569" } : undefined}
                   >
                     {item.description}
                   </span>

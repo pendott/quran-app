@@ -41,6 +41,21 @@ export function getDashboardHomeForRole(role: UserRole) {
   return defaultRouteByRole[role];
 }
 
+/** Pick the single best-matching nav href so `/students/bookings` does not also activate `/students`. */
+export function getActiveNavHref(pathname: string, navItems: NavItem[]) {
+  let best: string | null = null;
+
+  for (const item of navItems) {
+    const matches = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    if (!matches) continue;
+    if (!best || item.href.length > best.length) {
+      best = item.href;
+    }
+  }
+
+  return best;
+}
+
 const dashboardPathPrefixByRole: Record<UserRole, string> = {
   ADMIN: "/admin",
   TEACHER: "/teacher",
