@@ -31,6 +31,11 @@ export default async function LoginPage() {
             </Link>
           </p>
           <p className="mt-3 text-center text-sm text-slate-600">
+            <Link href="/forgot-password" className="font-semibold text-[#0d4f4f] hover:underline">
+              Forgot your password?
+            </Link>
+          </p>
+          <p className="mt-3 text-center text-sm text-slate-600">
             Want to teach on jomngaji.my?{" "}
             <Link href="/teach/apply" className="font-semibold text-[#0d4f4f] hover:underline">
               Apply as a teacher

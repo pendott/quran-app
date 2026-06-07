@@ -334,6 +334,7 @@ const updateStudentSchema = z.object({
   isActive: z.coerce.boolean(),
   primaryTeacherId: z.string().optional(),
   linkParentProfileId: z.string().optional(),
+  newPassword: z.string().optional(),
 });
 
 export async function adminUpdateStudentAction(
@@ -356,14 +357,37 @@ export async function adminUpdateStudentAction(
     isActive: formData.get("isActive") === "on",
     primaryTeacherId: String(formData.get("primaryTeacherId") ?? "").trim() || undefined,
     linkParentProfileId: String(formData.get("linkParentProfileId") ?? "").trim() || undefined,
+    newPassword: String(formData.get("newPassword") ?? "").trim() || undefined,
   });
   if (!parsed.success) return { ok: false, error: "Invalid form" };
 
-  const student = await prisma.student.findUnique({ where: { id: parsed.data.studentId } });
+  const student = await prisma.student.findUnique({
+    where: { id: parsed.data.studentId },
+    include: { user: true },
+  });
   if (!student) return { ok: false, error: "Student not found" };
 
+  if (parsed.data.newPassword) {
+    if (!student.userId) {
+      return { ok: false, error: "This student has no login account to reset" };
+    }
+    if (parsed.data.newPassword.length < 8) {
+      return { ok: false, error: "Password must be at least 8 characters" };
+    }
+  }
+
   try {
+    const passwordHash =
+      parsed.data.newPassword && student.userId ? await hash(parsed.data.newPassword, 12) : undefined;
+
     await prisma.$transaction(async (tx) => {
+      if (passwordHash && student.userId) {
+        await tx.user.update({
+          where: { id: student.userId },
+          data: { passwordHash },
+        });
+      }
+
       await tx.student.update({
         where: { id: student.id },
         data: {

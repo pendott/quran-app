@@ -34,6 +34,8 @@ export type AdminStudentForEdit = {
   primaryTeacherId: string | null;
   linkedParentProfileId: string | null;
   parents: { profileId: string; name: string }[];
+  loginEmail: string | null;
+  hasLogin: boolean;
 };
 
 export type AdminTeacherForEdit = {
@@ -136,6 +138,7 @@ export async function getAdminStudentForEdit(studentId: string): Promise<AdminSt
     const student = await prisma.student.findUnique({
       where: { id: studentId },
       include: {
+        user: true,
         parents: { include: { parent: { include: { user: true } } } },
         assignments: { where: { endsAt: null }, orderBy: { isPrimary: "desc" } },
       },
@@ -158,6 +161,8 @@ export async function getAdminStudentForEdit(studentId: string): Promise<AdminSt
         profileId: ps.parentId,
         name: ps.parent.user.name ?? ps.parent.user.email,
       })),
+      loginEmail: student.user?.email ?? null,
+      hasLogin: !!student.userId,
     };
   } catch (e) {
     if (!isDatabaseUnavailable(e)) console.error(e);

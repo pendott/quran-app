@@ -106,6 +106,27 @@ export function AdminEditStudentForm({ student, parents, teachers }: Props) {
         />
         <span>Active in roster</span>
       </label>
+      {student.hasLogin ? (
+        <>
+          <p className="text-sm text-slate-600 sm:col-span-2">
+            Login account: <strong>{student.loginEmail}</strong>
+          </p>
+          <label className="text-sm sm:col-span-2">
+            <span className="mb-1 block font-medium">Set new password (optional)</span>
+            <input
+              name="newPassword"
+              type="password"
+              minLength={8}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2"
+              placeholder="Leave blank to keep current password"
+            />
+          </label>
+        </>
+      ) : (
+        <p className="text-sm text-slate-500 sm:col-span-2">
+          This learner has no login account (managed by a parent only).
+        </p>
+      )}
       {student.parents.length > 0 ? (
         <p className="text-sm text-slate-600 sm:col-span-2">
           Linked parents: {student.parents.map((p) => p.name).join(", ")}

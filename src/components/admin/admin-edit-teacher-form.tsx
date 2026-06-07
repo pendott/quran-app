@@ -51,8 +51,8 @@ export function AdminEditTeacherForm({ teacher }: Props) {
         </select>
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium">New password (optional)</span>
-        <input name="newPassword" type="password" minLength={8} className="w-full rounded-xl border border-slate-200 px-3 py-2" />
+        <span className="mb-1 block font-medium">Set new password (optional)</span>
+        <input name="newPassword" type="password" minLength={8} className="w-full rounded-xl border border-slate-200 px-3 py-2" placeholder="Leave blank to keep current password" />
       </label>
       <label className="text-sm sm:col-span-2">
         <span className="mb-1 block font-medium">Headline</span>

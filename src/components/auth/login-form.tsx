@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
@@ -10,6 +11,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const registered = searchParams.get("registered") === "1";
+  const reset = searchParams.get("reset") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,11 @@ export function LoginForm() {
           Account created. Sign in with your email and password.
         </p>
       ) : null}
+      {reset ? (
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+          Password updated. Sign in with your new password.
+        </p>
+      ) : null}
       <div>
         <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
           Email
@@ -66,9 +73,14 @@ export function LoginForm() {
         />
       </div>
       <div>
-        <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
-          Password
-        </label>
+        <div className="mb-1 flex items-center justify-between gap-2">
+          <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+            Password
+          </label>
+          <Link href="/forgot-password" className="text-xs font-semibold text-[#0d4f4f] hover:underline">
+            Forgot password?
+          </Link>
+        </div>
         <input
           id="password"
           name="password"
