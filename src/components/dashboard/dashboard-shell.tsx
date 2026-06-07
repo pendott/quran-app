@@ -33,19 +33,19 @@ export function DashboardShell({
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950">
       <div className="mx-auto grid min-h-screen max-w-[1600px] gap-6 px-4 py-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-6">
-        <aside className="rounded-[32px] border border-[#0d4f4f]/20 bg-[#0d4f4f] p-6 text-slate-200 shadow-xl shadow-[#0d4f4f]/20">
+        <aside className="rounded-[32px] border border-[#0d4f4f]/15 bg-[#faf8f3] p-6 text-slate-900 shadow-xl shadow-[#0d4f4f]/10">
           <Link href="/" className="block">
-            <Logo variant="full" surface="pill" className="max-w-[160px]" />
+            <Logo variant="full" surface="transparent" className="max-w-[160px]" />
           </Link>
 
-          <div className="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-4 text-white">
-            <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Signed in as</p>
-            <p className="mt-2 text-base font-semibold text-white">{userName}</p>
-            <p className="mt-1 text-sm text-slate-300">{roleLabel} workspace</p>
+          <div className="mt-8 rounded-[24px] border border-[#0d4f4f]/10 bg-white p-4">
+            <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Signed in as</p>
+            <p className="mt-2 text-base font-semibold text-slate-900">{userName}</p>
+            <p className="mt-1 text-sm text-slate-600">{roleLabel} workspace</p>
             <button
               type="button"
               onClick={() => void signOut({ callbackUrl: "/login" })}
-              className="mt-4 w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
+              className="mt-4 w-full rounded-2xl border border-[#0d4f4f]/20 bg-[#0d4f4f] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#156b6b]"
             >
               Sign out
             </button>
@@ -61,18 +61,20 @@ export function DashboardShell({
                   href={item.href}
                   className={cn(
                     "block rounded-[22px] px-4 py-3 transition",
-                    isActive ? "bg-white shadow-sm" : "text-slate-100 hover:bg-white/10",
+                    isActive
+                      ? "bg-[#0d4f4f] shadow-sm"
+                      : "hover:bg-white/80",
                   )}
                 >
                   <span
-                    className={cn("block text-sm font-semibold", !isActive && "text-slate-100")}
-                    style={isActive ? { color: "#020617" } : undefined}
+                    className="block text-sm font-semibold"
+                    style={{ color: isActive ? "#ffffff" : "#0f172a" }}
                   >
                     {item.label}
                   </span>
                   <span
-                    className={cn("mt-1 block text-xs leading-5", !isActive && "text-slate-400")}
-                    style={isActive ? { color: "#475569" } : undefined}
+                    className="mt-1 block text-xs leading-5"
+                    style={{ color: isActive ? "#cbd5e1" : "#475569" }}
                   >
                     {item.description}
                   </span>
