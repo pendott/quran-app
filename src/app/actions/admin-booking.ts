@@ -16,6 +16,7 @@ import {
   resolveFamilyRecipientUserId,
   scheduleBookingRemindersForBooking,
 } from "@/server/booking/confirm-booking-artifacts";
+import { releasePackageCreditForBooking } from "@/server/booking/cancel-booking";
 
 async function requireAdmin() {
   const session = await auth();
@@ -210,6 +211,7 @@ export async function adminUpdateBookingAction(
       });
 
       if (willBeCancelled) {
+        await releasePackageCreditForBooking(tx, parsed.data.bookingId);
         await cancelBookingReminders(tx, parsed.data.bookingId);
         const classSession = await tx.classSession.findUnique({ where: { bookingId: parsed.data.bookingId } });
         if (classSession) {

@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { cancelBookingInTransaction } from "@/server/booking/cancel-booking";
 
 async function requireAdmin() {
   const session = await auth();
@@ -138,20 +139,12 @@ export async function adminCancelBookingAction(formData: FormData): Promise<void
   const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
   if (!booking || booking.status === BookingStatus.CANCELLED) return;
 
-  await prisma.booking.update({
-    where: { id: bookingId },
-    data: {
-      status: BookingStatus.CANCELLED,
-      cancelledAt: new Date(),
-    },
-  });
-
-  await prisma.reminder.updateMany({
-    where: { bookingId, status: "SCHEDULED" },
-    data: { status: "CANCELLED" },
+  await prisma.$transaction(async (tx) => {
+    await cancelBookingInTransaction(tx, bookingId);
   });
 
   revalidatePath("/admin/bookings");
+  revalidatePath(`/admin/bookings/${bookingId}/edit`);
   revalidatePath("/students/bookings");
 }
 
