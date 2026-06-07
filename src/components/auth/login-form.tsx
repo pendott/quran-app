@@ -9,6 +9,7 @@ import type { UserRole } from "@/lib/types";
 export function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  const registered = searchParams.get("registered") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +45,11 @@ export function LoginForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      {registered ? (
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+          Account created. Sign in with your email and password.
+        </p>
+      ) : null}
       <div>
         <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
           Email

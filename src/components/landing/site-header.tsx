@@ -32,10 +32,7 @@ export function SiteHeader() {
           >
             Sign in
           </Link>
-          <Link
-            href="/login?callbackUrl=%2Fstudents"
-            className={cn("rounded-full px-3 py-2 sm:px-4", brandUi.btnPrimary)}
-          >
+          <Link href="/register" className={cn("rounded-full px-3 py-2 sm:px-4", brandUi.btnPrimary)}>
             Start learning
           </Link>
         </div>

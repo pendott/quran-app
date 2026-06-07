@@ -13,8 +13,7 @@ export default async function LoginPage() {
           <p className="mt-5 text-sm uppercase tracking-[0.28em] text-[#c5a059]">{APP_TAGLINE}</p>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight">Welcome back</h1>
           <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-white/80">
-            Sign in with the email and password you were given. You will be routed to the right workspace for your
-            account.
+            Sign in to your learning portal, teacher dashboard, or admin workspace.
           </p>
         </section>
 
@@ -26,6 +25,12 @@ export default async function LoginPage() {
             </Suspense>
           </div>
           <p className="mt-6 text-center text-sm text-slate-600">
+            New here?{" "}
+            <Link href="/register" className="font-semibold text-[#0d4f4f] hover:underline">
+              Create a learner account
+            </Link>
+          </p>
+          <p className="mt-3 text-center text-sm text-slate-600">
             Want to teach on jomngaji.my?{" "}
             <Link href="/teach/apply" className="font-semibold text-[#0d4f4f] hover:underline">
               Apply as a teacher
