@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { DbBanner } from "@/components/dashboard/db-banner";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { TeacherApplicationReview } from "@/components/admin/teacher-application-review";
+import { teacherApplicationFileUrl } from "@/lib/teacher-application/upload-url";
 import { getAdminTeacherApplicationDetail } from "@/server/queries/teacher-applications";
 
 export default async function AdminTeacherApplicationDetailPage({
@@ -46,7 +47,9 @@ export default async function AdminTeacherApplicationDetailPage({
             maxStudentsPerWeek: application.maxStudentsPerWeek,
             about: application.about,
             photoPath: application.photoPath,
+            photoUrl: teacherApplicationFileUrl(application.photoPath),
             certificationPath: application.certificationPath,
+            certificationUrl: teacherApplicationFileUrl(application.certificationPath),
             timezone: application.timezone,
             teachingSubjectLabels: application.teachingSubjectLabels,
             studentLevelLabels: application.studentLevelLabels,

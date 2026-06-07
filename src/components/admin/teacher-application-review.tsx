@@ -26,7 +26,9 @@ type Props = {
     maxStudentsPerWeek: number;
     about: string;
     photoPath: string | null;
+    photoUrl: string | null;
     certificationPath: string | null;
+    certificationUrl: string | null;
     timezone: string;
     teachingSubjectLabels: string[];
     studentLevelLabels: string[];
@@ -70,13 +72,17 @@ export function TeacherApplicationReview({ application }: Props) {
       ) : null}
 
       <div className="flex flex-wrap gap-6">
-        {application.photoPath ? (
+        {application.photoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={application.photoPath}
+            src={application.photoUrl}
             alt={application.name}
             className="h-32 w-32 rounded-2xl border border-slate-200 object-cover"
           />
+        ) : application.photoPath ? (
+          <div className="flex h-32 w-32 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-2 text-center text-xs text-slate-500">
+            Photo file missing on server
+          </div>
         ) : null}
         <div className="min-w-0 flex-1 space-y-2 text-sm text-slate-700">
           <p>
@@ -122,17 +128,22 @@ export function TeacherApplicationReview({ application }: Props) {
         </div>
       </div>
 
-      {application.certificationPath ? (
+      {application.certificationUrl ? (
         <section>
           <h3 className="text-sm font-semibold text-slate-900">Certification file</h3>
           <a
-            href={application.certificationPath}
+            href={application.certificationUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 inline-flex text-sm font-semibold text-[#0d4f4f] hover:underline"
           >
             View uploaded ijazah / certificate →
           </a>
+        </section>
+      ) : application.certificationPath ? (
+        <section>
+          <h3 className="text-sm font-semibold text-slate-900">Certification file</h3>
+          <p className="mt-2 text-sm text-slate-500">Uploaded file is no longer on the server.</p>
         </section>
       ) : null}
 
