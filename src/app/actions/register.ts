@@ -4,6 +4,7 @@ import { UserRole, UserStatus } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { sendRegistrationWelcomeEmail } from "@/server/registration/emails";
 
 export type RegisterState = { ok: boolean; error: string | null };
 
@@ -89,6 +90,13 @@ export async function registerAccountAction(
           displayName: learnerName,
         },
       });
+    });
+
+    void sendRegistrationWelcomeEmail({
+      to: email,
+      name: parsed.data.name.trim(),
+      accountType: isParent ? "parent" : "student",
+      learnerName,
     });
 
     return { ok: true, error: null };
