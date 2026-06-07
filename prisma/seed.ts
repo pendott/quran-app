@@ -1,9 +1,7 @@
 import {
   BookingStatus,
   IdDocumentType,
-  PackageType,
   PaymentStatus,
-  PricingRuleType,
   SessionStatus,
   TeacherApplicationStatus,
   UserRole,
@@ -12,6 +10,8 @@ import {
 } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { addDays, setHours, setMinutes, subDays } from "date-fns";
+import { PER_SESSION_PRICING } from "../src/lib/packages/catalog";
+import { syncPackageCatalog } from "../src/server/packages/sync-catalog";
 
 const prisma = new PrismaClient();
 
@@ -221,40 +221,15 @@ async function main() {
     ),
   });
 
-  const perSession = await prisma.pricingRule.create({
-    data: {
-      name: "Single session",
-      type: PricingRuleType.PER_SESSION,
-      currency: "MYR",
-      price: 45,
-      sessionCount: 1,
-      isActive: true,
-    },
-  });
+  await syncPackageCatalog(prisma);
 
-  const bundle4 = await prisma.pricingRule.create({
-    data: {
-      name: "4-session bundle",
-      type: PricingRuleType.PACKAGE,
-      currency: "MYR",
-      price: 160,
-      sessionCount: 4,
-      isActive: true,
-    },
+  const perSession = await prisma.pricingRule.findFirst({
+    where: { name: PER_SESSION_PRICING.name, isActive: true },
   });
-
-  const pkg4 = await prisma.package.create({
-    data: {
-      name: "4 classes",
-      type: PackageType.SESSION_BUNDLE,
-      currency: "MYR",
-      price: 160,
-      sessionCredits: 4,
-      durationDays: 90,
-      isActive: true,
-      pricingRuleId: bundle4.id,
-    },
-  });
+  const pkg4 = await prisma.package.findFirst({ where: { name: "4 classes", isActive: true } });
+  if (!perSession || !pkg4) {
+    throw new Error("Expected per-session pricing and 4-class package after catalog sync");
+  }
 
   await prisma.packagePurchase.create({
     data: {

@@ -54,7 +54,7 @@ export function BuyPackagesSection({ packages, students, billplzEnabled }: Props
       {err ? (
         <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{err}</p>
       ) : null}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {packages.map((pkg) => (
           <form
             key={pkg.id}
