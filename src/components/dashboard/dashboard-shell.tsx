@@ -59,11 +59,15 @@ export function DashboardShell({
                   href={item.href}
                   className={cn(
                     "block rounded-[22px] px-4 py-3 transition",
-                    isActive ? "bg-white text-slate-950" : "bg-white/0 text-slate-200 hover:bg-white/8",
+                    isActive
+                      ? "bg-white text-slate-950 shadow-sm"
+                      : "bg-transparent text-slate-200 hover:bg-white/10",
                   )}
                 >
-                  <p className="text-sm font-semibold">{item.label}</p>
-                  <p className={cn("mt-1 text-xs leading-5", isActive ? "text-slate-500" : "text-slate-400")}>
+                  <p className={cn("text-sm font-semibold", isActive ? "text-slate-950" : "text-slate-100")}>
+                    {item.label}
+                  </p>
+                  <p className={cn("mt-1 text-xs leading-5", isActive ? "text-slate-600" : "text-slate-400")}>
                     {item.description}
                   </p>
                 </Link>
