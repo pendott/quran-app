@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOutToHome } from "@/lib/auth-sign-out";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/brand/logo";
 import { APP_NAME } from "@/lib/brand";
@@ -47,7 +47,7 @@ export function DashboardShell({
             <p className="mt-1 text-sm text-slate-300">{roleLabel} workspace</p>
             <button
               type="button"
-              onClick={() => void signOut({ callbackUrl: "/login" })}
+              onClick={() => void signOutToHome()}
               className="mt-4 w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
             >
               Sign out
