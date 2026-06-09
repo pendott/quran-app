@@ -1,4 +1,5 @@
 import { UserRole, PrismaClient } from "@prisma/client";
+import { ensureDemoAccounts } from "./demo-accounts";
 
 const prisma = new PrismaClient();
 
@@ -40,7 +41,10 @@ async function main() {
     console.log(`  - ${admin.email}${admin.name ? ` (${admin.name})` : ""}`);
   }
   console.log(`Removed ${removedUsers.count} non-admin user(s) and all learner/teacher records.`);
-  console.log("Pricing rules, packages, and cancellation rules were kept.\n");
+
+  await ensureDemoAccounts(prisma);
+
+  console.log("Re-created demo teacher, parent, and student accounts for testing.\n");
 }
 
 main()
