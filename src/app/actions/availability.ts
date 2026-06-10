@@ -92,21 +92,57 @@ export async function createAvailabilityAction(
     return { ok: false, error: "Choose a date" };
   }
 
+  const specificDate =
+    parsed.data.type === "EXCEPTION" && parsed.data.specificDate
+      ? new Date(`${parsed.data.specificDate}T12:00:00`)
+      : null;
+
   try {
-    await prisma.teacherAvailability.create({
-      data: {
-        teacherId: resolved.teacherId,
-        type: parsed.data.type,
-        dayOfWeek: parsed.data.type === "RECURRING" ? parsed.data.dayOfWeek : null,
-        specificDate:
-          parsed.data.type === "EXCEPTION" && parsed.data.specificDate
-            ? new Date(`${parsed.data.specificDate}T12:00:00`)
-            : null,
-        startTime: parsed.data.startTime,
-        endTime: parsed.data.endTime,
-        slotDurationMinutes: parsed.data.slotDurationMinutes,
-      },
+    const existing = await prisma.teacherAvailability.findFirst({
+      where:
+        parsed.data.type === "RECURRING"
+          ? {
+              teacherId: resolved.teacherId,
+              type: "RECURRING",
+              dayOfWeek: parsed.data.dayOfWeek!,
+              startTime: parsed.data.startTime,
+              endTime: parsed.data.endTime,
+            }
+          : {
+              teacherId: resolved.teacherId,
+              type: "EXCEPTION",
+              specificDate: specificDate!,
+              startTime: parsed.data.startTime,
+              endTime: parsed.data.endTime,
+            },
     });
+
+    if (existing?.isActive) {
+      return { ok: false, error: "This slot is already on your schedule." };
+    }
+
+    if (existing) {
+      await prisma.teacherAvailability.update({
+        where: { id: existing.id },
+        data: {
+          isActive: true,
+          slotDurationMinutes: parsed.data.slotDurationMinutes,
+        },
+      });
+    } else {
+      await prisma.teacherAvailability.create({
+        data: {
+          teacherId: resolved.teacherId,
+          type: parsed.data.type,
+          dayOfWeek: parsed.data.type === "RECURRING" ? parsed.data.dayOfWeek : null,
+          specificDate,
+          startTime: parsed.data.startTime,
+          endTime: parsed.data.endTime,
+          slotDurationMinutes: parsed.data.slotDurationMinutes,
+        },
+      });
+    }
+
     revalidateAvailabilityPaths(resolved.teacherId, asAdmin);
     return { ok: true, error: null };
   } catch (e) {
