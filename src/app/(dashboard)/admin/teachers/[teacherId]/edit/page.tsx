@@ -5,10 +5,14 @@ import { AdminEditTeacherForm } from "@/components/admin/admin-edit-teacher-form
 import { SectionCard } from "@/components/dashboard/section-card";
 import { getAdminTeacherForEdit } from "@/server/queries/admin-users";
 
-type Props = { params: Promise<{ teacherId: string }> };
+type Props = {
+  params: Promise<{ teacherId: string }>;
+  searchParams: Promise<{ deleteError?: string }>;
+};
 
-export default async function AdminEditTeacherPage({ params }: Props) {
+export default async function AdminEditTeacherPage({ params, searchParams }: Props) {
   const { teacherId } = await params;
+  const { deleteError } = await searchParams;
   const teacher = await getAdminTeacherForEdit(teacherId);
   if (!teacher) notFound();
 
@@ -34,10 +38,10 @@ export default async function AdminEditTeacherPage({ params }: Props) {
       </SectionCard>
 
       <SectionCard
-        title="Delete teacher"
-        description="Permanently remove this teacher account from jomngaji.my."
+        title="Delete teacher profile and account"
+        description="Permanently remove this teacher from jomngaji.my — login, profile, availability, and assignments."
       >
-        <AdminDeleteTeacherForm teacher={teacher} />
+        <AdminDeleteTeacherForm teacher={teacher} deleteError={deleteError} />
       </SectionCard>
     </div>
   );

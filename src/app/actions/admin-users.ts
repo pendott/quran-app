@@ -3,6 +3,7 @@
 import { UserRole, UserStatus } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
@@ -189,28 +190,30 @@ export async function adminUpdateTeacherAction(
   }
 }
 
-export async function adminDeleteTeacherAction(
-  _prev: AdminUserFormState,
-  formData: FormData,
-): Promise<AdminUserFormState> {
+/** Plain form action — redirect works reliably (unlike useActionState + redirect). */
+export async function adminDeleteTeacherFormAction(formData: FormData): Promise<void> {
+  const teacherId = String(formData.get("teacherId") ?? "").trim();
+  const returnTo = teacherId ? `/admin/teachers/${teacherId}/edit` : "/admin/teachers";
+
+  const fail = (message: string) => {
+    redirect(`${returnTo}?deleteError=${encodeURIComponent(message)}#delete-teacher`);
+  };
+
   try {
     await requireAdmin();
   } catch {
-    return { ok: false, error: "Not authorized" };
+    fail("Not authorized");
   }
 
-  const teacherId = String(formData.get("teacherId") ?? "").trim();
-  if (!teacherId) return { ok: false, error: "Teacher not found" };
-
-  const confirm = formData.get("confirmDelete") === "on";
-  if (!confirm) return { ok: false, error: "Confirm deletion to continue" };
+  if (!teacherId) fail("Teacher not found");
+  if (formData.get("confirmDelete") !== "on") fail("Confirm deletion to continue");
 
   const result = await deleteTeacherAccount(teacherId);
-  if (!result.ok) return { ok: false, error: result.error };
+  if (!result.ok) fail(result.error);
 
   revalidateUserPaths();
   revalidatePath("/admin/bookings");
-  return { ok: true, error: null };
+  redirect("/admin/teachers?deleted=1");
 }
 
 export async function adminDeleteStudentAction(

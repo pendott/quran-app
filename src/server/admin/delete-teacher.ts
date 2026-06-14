@@ -39,6 +39,8 @@ export async function deleteTeacherAccount(teacherId: string): Promise<{ ok: tru
       await deleteClassSessions(tx, remainingSessionIds);
 
       await tx.classNote.deleteMany({ where: { teacherId } });
+      await tx.studentTeacherAssignment.deleteMany({ where: { teacherId } });
+      await tx.teacherAvailability.deleteMany({ where: { teacherId } });
       await clearUserFinancialRecords(tx, teacher.userId);
       await tx.user.delete({ where: { id: teacher.userId } });
     });

@@ -275,5 +275,14 @@ export function teacherManageLinks(teacherId: string) {
       },
       "Availability",
     ),
+    " · ",
+    createElement(
+      Link,
+      {
+        href: `/admin/teachers/${teacherId}/edit#delete-teacher`,
+        className: "font-medium text-red-700 underline",
+      },
+      "Delete",
+    ),
   );
 }

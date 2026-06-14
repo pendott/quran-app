@@ -1,33 +1,23 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useActionState, useEffect } from "react";
-import {
-  adminDeleteTeacherAction,
-  adminUserFormInitial,
-} from "@/app/actions/admin-users";
+import { adminDeleteTeacherFormAction } from "@/app/actions/admin-users";
 import type { AdminTeacherForEdit } from "@/server/queries/admin-users";
 
-type Props = { teacher: AdminTeacherForEdit };
+type Props = {
+  teacher: AdminTeacherForEdit;
+  deleteError?: string | null;
+};
 
-export function AdminDeleteTeacherForm({ teacher }: Props) {
-  const router = useRouter();
-  const [state, formAction, pending] = useActionState(adminDeleteTeacherAction, adminUserFormInitial);
-
-  useEffect(() => {
-    if (state?.ok) {
-      router.replace("/admin/teachers?deleted=1");
-    }
-  }, [state, router]);
-
+export function AdminDeleteTeacherForm({ teacher, deleteError }: Props) {
   return (
     <form
-      action={formAction}
+      id="delete-teacher"
+      action={adminDeleteTeacherFormAction}
       className="space-y-3"
       onSubmit={(e) => {
         const message = [
           `Delete ${teacher.name || teacher.email}?`,
-          "This permanently removes their login, profile, availability, and student assignments.",
+          "This permanently removes their teacher profile, login account, availability, and student assignments.",
           teacher.bookingCount
             ? `Also deletes ${teacher.bookingCount} booking record(s) and related class history.`
             : null,
@@ -39,13 +29,14 @@ export function AdminDeleteTeacherForm({ teacher }: Props) {
       }}
     >
       <input type="hidden" name="teacherId" value={teacher.id} />
-      {state?.error ? (
-        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{state.error}</p>
+      {deleteError ? (
+        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{deleteError}</p>
       ) : null}
       <p className="text-sm text-slate-600">
+        Removes <strong>{teacher.email}</strong> login and the full teacher profile.
         {teacher.bookingCount > 0
-          ? `${teacher.bookingCount} booking(s) on record will be removed.`
-          : "No bookings on record."}
+          ? ` ${teacher.bookingCount} booking(s) on record will be removed.`
+          : " No bookings on record."}
         {teacher.activeStudentCount > 0
           ? ` ${teacher.activeStudentCount} active student assignment(s) will end.`
           : null}
@@ -57,14 +48,13 @@ export function AdminDeleteTeacherForm({ teacher }: Props) {
           required
           className="mt-1 rounded border-slate-300"
         />
-        <span>I understand this teacher account will be permanently deleted.</span>
+        <span>I understand this teacher profile and account will be permanently deleted.</span>
       </label>
       <button
         type="submit"
-        disabled={pending}
-        className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-100 disabled:opacity-50"
+        className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-100"
       >
-        {pending ? "Deleting…" : "Delete teacher"}
+        Delete profile and account
       </button>
     </form>
   );
