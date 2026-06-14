@@ -31,7 +31,7 @@ export function Hero() {
             memorisation progress — all in one place.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link href="/login?callbackUrl=%2Fstudents" className={brandUi.btnPrimary}>
+            <Link href="/register" className={brandUi.btnPrimary}>
               Start learning today
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>

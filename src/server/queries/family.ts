@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { prisma } from "@/lib/db";
 import { meetingJoinLinkCell } from "@/components/dashboard/meeting-join-link";
 import { formatDateTime, formatMYR } from "@/lib/format";
@@ -177,7 +178,17 @@ export async function getFamilyDashboard(
   }
 }
 
-export async function getFamilyBookingsTable(userId: string, role: UserRole): Promise<{ rows: TableRow[]; dbError: boolean }> {
+export type FamilyBookingRow = {
+  id: string;
+  slot: string;
+  teacher: string;
+  package: string;
+  zoomJoin: ReactNode;
+  status: string;
+  canManage: boolean;
+};
+
+export async function getFamilyBookingsTable(userId: string, role: UserRole): Promise<{ rows: FamilyBookingRow[]; dbError: boolean }> {
   try {
     const ids = await getFamilyStudentIds(userId, role);
     if (!ids.length) return { rows: [], dbError: false };
@@ -194,7 +205,7 @@ export async function getFamilyBookingsTable(userId: string, role: UserRole): Pr
       },
     });
 
-    const rows: TableRow[] = bookings.map((b) => {
+    const rows: FamilyBookingRow[] = bookings.map((b) => {
       const link = b.classSession?.meetingLink;
       const pendingReason =
         b.status === "PENDING_PAYMENT"
@@ -202,12 +213,20 @@ export async function getFamilyBookingsTable(userId: string, role: UserRole): Pr
           : b.status === "CANCELLED"
             ? "Cancelled"
             : "Confirm booking first";
+      const canManage =
+        b.scheduledStartAt > new Date() &&
+        b.status !== "CANCELLED" &&
+        b.status !== "COMPLETED" &&
+        b.status !== "NO_SHOW";
+
       return {
-        Slot: formatDateTime(b.scheduledStartAt),
-        Teacher: b.teacher.user.name ?? b.teacher.user.email,
-        Package: b.packagePurchase ? b.packagePurchase.package.name : (b.pricingRule?.name ?? "—"),
-        "Zoom / join": meetingJoinLinkCell(link?.joinUrl, link?.provider, pendingReason),
-        Status: b.status.replace(/_/g, " "),
+        id: b.id,
+        slot: formatDateTime(b.scheduledStartAt),
+        teacher: b.teacher.user.name ?? b.teacher.user.email,
+        package: b.packagePurchase ? b.packagePurchase.package.name : (b.pricingRule?.name ?? "—"),
+        zoomJoin: meetingJoinLinkCell(link?.joinUrl, link?.provider, pendingReason),
+        status: b.status.replace(/_/g, " "),
+        canManage,
       };
     });
 

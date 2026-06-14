@@ -31,16 +31,17 @@ async function resolveTeacherId(formTeacherId: string | null, asAdmin: boolean) 
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
+/** FormData returns `null` for missing fields — use nullish(), not optional(). */
 const createSchema = z.object({
-  teacherId: z.string().optional(),
-  asAdmin: z.string().optional(),
+  teacherId: z.string().nullish(),
+  asAdmin: z.string().nullish(),
   type: z.enum(["RECURRING", "EXCEPTION"]),
-  dayOfWeek: z.coerce.number().int().min(0).max(6).optional(),
-  specificDate: z.string().optional(),
+  dayOfWeek: z.coerce.number().int().min(0).max(6).nullish(),
+  specificDate: z.string().nullish(),
   startTime: z.string().regex(timeRegex),
   endTime: z.string().regex(timeRegex),
   slotDurationMinutes: z.coerce.number().int().min(15).max(180),
-  month: z.string().optional(),
+  month: z.string().nullish(),
 });
 
 function revalidateAvailabilityPaths(teacherId: string, asAdmin: boolean) {
@@ -75,14 +76,15 @@ export async function createAvailabilityAction(
   });
 
   if (!parsed.success) {
-    return { ok: false, error: "Invalid form" };
+    const issue = parsed.error.issues[0];
+    return { ok: false, error: issue?.message ?? "Invalid form" };
   }
 
   if (parsed.data.startTime >= parsed.data.endTime) {
     return { ok: false, error: "End time must be after start time" };
   }
 
-  if (parsed.data.type === "RECURRING" && parsed.data.dayOfWeek == null) {
+  if (parsed.data.type === "RECURRING" && (parsed.data.dayOfWeek === null || parsed.data.dayOfWeek === undefined)) {
     return { ok: false, error: "Choose a weekday" };
   }
 
@@ -90,21 +92,57 @@ export async function createAvailabilityAction(
     return { ok: false, error: "Choose a date" };
   }
 
+  const specificDate =
+    parsed.data.type === "EXCEPTION" && parsed.data.specificDate
+      ? new Date(`${parsed.data.specificDate}T12:00:00`)
+      : null;
+
   try {
-    await prisma.teacherAvailability.create({
-      data: {
-        teacherId: resolved.teacherId,
-        type: parsed.data.type,
-        dayOfWeek: parsed.data.type === "RECURRING" ? parsed.data.dayOfWeek : null,
-        specificDate:
-          parsed.data.type === "EXCEPTION" && parsed.data.specificDate
-            ? new Date(`${parsed.data.specificDate}T12:00:00`)
-            : null,
-        startTime: parsed.data.startTime,
-        endTime: parsed.data.endTime,
-        slotDurationMinutes: parsed.data.slotDurationMinutes,
-      },
+    const existing = await prisma.teacherAvailability.findFirst({
+      where:
+        parsed.data.type === "RECURRING"
+          ? {
+              teacherId: resolved.teacherId,
+              type: "RECURRING",
+              dayOfWeek: parsed.data.dayOfWeek!,
+              startTime: parsed.data.startTime,
+              endTime: parsed.data.endTime,
+            }
+          : {
+              teacherId: resolved.teacherId,
+              type: "EXCEPTION",
+              specificDate: specificDate!,
+              startTime: parsed.data.startTime,
+              endTime: parsed.data.endTime,
+            },
     });
+
+    if (existing?.isActive) {
+      return { ok: false, error: "This slot is already on your schedule." };
+    }
+
+    if (existing) {
+      await prisma.teacherAvailability.update({
+        where: { id: existing.id },
+        data: {
+          isActive: true,
+          slotDurationMinutes: parsed.data.slotDurationMinutes,
+        },
+      });
+    } else {
+      await prisma.teacherAvailability.create({
+        data: {
+          teacherId: resolved.teacherId,
+          type: parsed.data.type,
+          dayOfWeek: parsed.data.type === "RECURRING" ? parsed.data.dayOfWeek : null,
+          specificDate,
+          startTime: parsed.data.startTime,
+          endTime: parsed.data.endTime,
+          slotDurationMinutes: parsed.data.slotDurationMinutes,
+        },
+      });
+    }
+
     revalidateAvailabilityPaths(resolved.teacherId, asAdmin);
     return { ok: true, error: null };
   } catch (e) {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdminDeleteParentForm } from "@/components/admin/admin-delete-parent-form";
 import { AdminAddStudentForm } from "@/components/admin/admin-add-student-form";
 import { AdminEditParentForm } from "@/components/admin/admin-edit-parent-form";
 import { SectionCard } from "@/components/dashboard/section-card";
@@ -41,6 +42,13 @@ export default async function AdminEditParentPage({ params }: Props) {
           <p className="mb-4 text-sm text-slate-500">No students linked yet.</p>
         )}
         <AdminAddStudentForm parentUserId={parent.userId} />
+      </SectionCard>
+
+      <SectionCard
+        title="Delete parent"
+        description="Permanently remove this parent account from jomngaji.my."
+      >
+        <AdminDeleteParentForm parent={parent} />
       </SectionCard>
     </div>
   );

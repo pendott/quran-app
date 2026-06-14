@@ -5,23 +5,23 @@ import { cn } from "@/lib/utils";
 
 const tiers = [
   {
-    name: "Try a session",
-    price: "From RM 35",
-    detail: "Perfect for your first lesson or an occasional catch-up.",
-    bullets: ["Book one class at a time", "Meet your teacher online", "Notes after class"],
+    name: "1 class",
+    price: "RM 45",
+    detail: "Try a single lesson or book when it suits you.",
+    bullets: ["One 60-minute session", "Meet your teacher online", "Notes after class"],
   },
   {
-    name: "Session packages",
-    price: "4 or 8 classes",
-    detail: "Save when you commit to regular learning each week.",
-    bullets: ["Credits applied automatically", "Family-friendly receipts", "Email reminders"],
+    name: "2 classes",
+    price: "RM 90",
+    detail: "A short bundle for regular weekly practice.",
+    bullets: ["2 session credits", "Family-friendly receipts", "Email reminders"],
+  },
+  {
+    name: "4 classes",
+    price: "RM 180",
+    detail: "Best value for students learning every week.",
+    bullets: ["4 session credits", "Credits applied when you book", "Secure online payment"],
     featured: true,
-  },
-  {
-    name: "Monthly plan",
-    price: "Ask us",
-    detail: "For dedicated students who want a fixed schedule every month.",
-    bullets: ["Priority booking slots", "Progress tracking", "Renewal reminders"],
   },
 ];
 
@@ -65,7 +65,7 @@ export function PricingTeaser() {
           <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-slate-300">
             Create your account, pick a teacher, and book your first class — learn Quran from anywhere today.
           </p>
-          <Link href="/login?callbackUrl=%2Fstudents" className={cn("mt-6", brandUi.btnOnDark)}>
+          <Link href="/register" className={cn("mt-6", brandUi.btnOnDark)}>
             Get started free
           </Link>
         </div>

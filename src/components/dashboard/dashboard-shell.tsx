@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOutToHome } from "@/lib/auth-sign-out";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/brand/logo";
 import { APP_NAME } from "@/lib/brand";
+import { getActiveNavHref } from "@/lib/navigation";
 import type { NavItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,9 @@ type DashboardShellProps = {
   children: ReactNode;
 };
 
+const navTitleColor = (isActive: boolean) => (isActive ? "#020617" : "#ffffff");
+const navDescColor = (isActive: boolean) => (isActive ? "#475569" : "#cbd5e1");
+
 export function DashboardShell({
   navItems,
   roleLabel,
@@ -27,22 +31,23 @@ export function DashboardShell({
   children,
 }: DashboardShellProps) {
   const pathname = usePathname();
+  const activeHref = getActiveNavHref(pathname, navItems);
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950">
       <div className="mx-auto grid min-h-screen max-w-[1600px] gap-6 px-4 py-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-6">
-        <aside className="rounded-[32px] border border-[#0d4f4f]/20 bg-[#0d4f4f] p-6 text-white shadow-xl shadow-[#0d4f4f]/20">
+        <aside className="rounded-[32px] border border-[#0d4f4f]/20 bg-[#0d4f4f] p-6 shadow-xl shadow-[#0d4f4f]/20">
           <Link href="/" className="block">
             <Logo variant="full" surface="pill" className="max-w-[160px]" />
           </Link>
 
           <div className="mt-8 rounded-[24px] border border-white/10 bg-white/5 p-4">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Signed in as</p>
-            <p className="mt-2 text-base font-semibold">{userName}</p>
+            <p className="mt-2 text-base font-semibold text-white">{userName}</p>
             <p className="mt-1 text-sm text-slate-300">{roleLabel} workspace</p>
             <button
               type="button"
-              onClick={() => void signOut({ callbackUrl: "/login" })}
+              onClick={() => void signOutToHome()}
               className="mt-4 w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
             >
               Sign out
@@ -51,7 +56,7 @@ export function DashboardShell({
 
           <nav className="mt-8 space-y-2">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const isActive = item.href === activeHref;
 
               return (
                 <Link
@@ -59,13 +64,21 @@ export function DashboardShell({
                   href={item.href}
                   className={cn(
                     "block rounded-[22px] px-4 py-3 transition",
-                    isActive ? "bg-white text-slate-950" : "bg-white/0 text-slate-200 hover:bg-white/8",
+                    isActive ? "bg-white shadow-sm" : "hover:bg-white/10",
                   )}
                 >
-                  <p className="text-sm font-semibold">{item.label}</p>
-                  <p className={cn("mt-1 text-xs leading-5", isActive ? "text-slate-500" : "text-slate-400")}>
+                  <span
+                    className="block text-sm font-bold"
+                    style={{ color: navTitleColor(isActive) }}
+                  >
+                    {item.label}
+                  </span>
+                  <span
+                    className="mt-1 block text-xs leading-5"
+                    style={{ color: navDescColor(isActive) }}
+                  >
                     {item.description}
-                  </p>
+                  </span>
                 </Link>
               );
             })}

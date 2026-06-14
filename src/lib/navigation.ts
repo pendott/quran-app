@@ -22,13 +22,17 @@ export const teacherNavItems: NavItem[] = [
   { href: "/teacher/students", label: "Students", description: "Assigned learners and history" },
 ];
 
-export const studentNavItems: NavItem[] = [
+/** Shared nav for PARENT and STUDENT roles — both use /students. */
+export const familyNavItems: NavItem[] = [
   { href: "/students", label: "Overview", description: "Next class, package balance, reminders" },
   { href: "/students/bookings", label: "Bookings", description: "Calendar view and slot selection" },
   { href: "/students/progress", label: "Progress", description: "Surah and ayah learning timeline" },
   { href: "/students/recordings", label: "Recordings", description: "Replay completed class sessions" },
   { href: "/students/payments", label: "Payments", description: "Receipts, package purchases, refunds" },
 ];
+
+/** @deprecated Use familyNavItems */
+export const studentNavItems = familyNavItems;
 
 const defaultRouteByRole: Record<UserRole, string> = {
   ADMIN: "/admin",
@@ -39,6 +43,21 @@ const defaultRouteByRole: Record<UserRole, string> = {
 
 export function getDashboardHomeForRole(role: UserRole) {
   return defaultRouteByRole[role];
+}
+
+/** Pick the single best-matching nav href so `/students/bookings` does not also activate `/students`. */
+export function getActiveNavHref(pathname: string, navItems: NavItem[]) {
+  let best: string | null = null;
+
+  for (const item of navItems) {
+    const matches = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    if (!matches) continue;
+    if (!best || item.href.length > best.length) {
+      best = item.href;
+    }
+  }
+
+  return best;
 }
 
 const dashboardPathPrefixByRole: Record<UserRole, string> = {

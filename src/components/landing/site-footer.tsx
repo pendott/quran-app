@@ -32,11 +32,16 @@ export function SiteFooter() {
             </ul>
           </div>
           <div>
-            <p className="font-semibold text-[#c5a059]">Sign in</p>
+            <p className="font-semibold text-[#c5a059]">Account</p>
             <ul className="mt-3 space-y-2 text-white/75">
               <li>
+                <Link href="/register" className="hover:text-white">
+                  Create account
+                </Link>
+              </li>
+              <li>
                 <Link href="/login?callbackUrl=%2Fstudents" className="hover:text-white">
-                  Family / Student
+                  Learning portal
                 </Link>
               </li>
               <li>

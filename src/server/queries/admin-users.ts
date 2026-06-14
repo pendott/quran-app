@@ -21,6 +21,9 @@ export type AdminParentForEdit = {
   emergencyContact: string | null;
   notes: string | null;
   students: { id: string; displayName: string; isActive: boolean }[];
+  studentCount: number;
+  bookingCount: number;
+  packagePurchaseCount: number;
 };
 
 export type AdminStudentForEdit = {
@@ -34,6 +37,11 @@ export type AdminStudentForEdit = {
   primaryTeacherId: string | null;
   linkedParentProfileId: string | null;
   parents: { profileId: string; name: string }[];
+  loginEmail: string | null;
+  hasLogin: boolean;
+  bookingCount: number;
+  packagePurchaseCount: number;
+  parentCount: number;
 };
 
 export type AdminTeacherForEdit = {
@@ -48,6 +56,8 @@ export type AdminTeacherForEdit = {
   experienceYears: number;
   maxStudents: number;
   isAcceptingBookings: boolean;
+  bookingCount: number;
+  activeStudentCount: number;
 };
 
 export type AdminUserPickerParent = { profileId: string; label: string };
@@ -111,6 +121,11 @@ export async function getAdminParentForEdit(userId: string): Promise<AdminParent
     });
     if (!profile) return null;
 
+    const [bookingCount, packagePurchaseCount] = await Promise.all([
+      prisma.booking.count({ where: { bookedById: userId } }),
+      prisma.packagePurchase.count({ where: { purchasedById: userId } }),
+    ]);
+
     return {
       userId: profile.userId,
       name: profile.user.name ?? "",
@@ -124,6 +139,9 @@ export async function getAdminParentForEdit(userId: string): Promise<AdminParent
         displayName: ps.student.displayName,
         isActive: ps.student.isActive,
       })),
+      studentCount: profile.students.length,
+      bookingCount,
+      packagePurchaseCount,
     };
   } catch (e) {
     if (!isDatabaseUnavailable(e)) console.error(e);
@@ -136,8 +154,10 @@ export async function getAdminStudentForEdit(studentId: string): Promise<AdminSt
     const student = await prisma.student.findUnique({
       where: { id: studentId },
       include: {
+        user: true,
         parents: { include: { parent: { include: { user: true } } } },
         assignments: { where: { endsAt: null }, orderBy: { isPrimary: "desc" } },
+        _count: { select: { bookings: true, packagePurchases: true, parents: true } },
       },
     });
     if (!student) return null;
@@ -158,6 +178,11 @@ export async function getAdminStudentForEdit(studentId: string): Promise<AdminSt
         profileId: ps.parentId,
         name: ps.parent.user.name ?? ps.parent.user.email,
       })),
+      loginEmail: student.user?.email ?? null,
+      hasLogin: !!student.userId,
+      bookingCount: student._count.bookings,
+      packagePurchaseCount: student._count.packagePurchases,
+      parentCount: student._count.parents,
     };
   } catch (e) {
     if (!isDatabaseUnavailable(e)) console.error(e);
@@ -169,7 +194,11 @@ export async function getAdminTeacherForEdit(teacherId: string): Promise<AdminTe
   try {
     const teacher = await prisma.teacher.findUnique({
       where: { id: teacherId },
-      include: { user: true },
+      include: {
+        user: true,
+        assignments: { where: { endsAt: null } },
+        _count: { select: { bookings: true } },
+      },
     });
     if (!teacher) return null;
 
@@ -185,6 +214,8 @@ export async function getAdminTeacherForEdit(teacherId: string): Promise<AdminTe
       experienceYears: teacher.experienceYears,
       maxStudents: teacher.maxStudents,
       isAcceptingBookings: teacher.isAcceptingBookings,
+      bookingCount: teacher._count.bookings,
+      activeStudentCount: teacher.assignments.length,
     };
   } catch (e) {
     if (!isDatabaseUnavailable(e)) console.error(e);
@@ -243,6 +274,15 @@ export function teacherManageLinks(teacherId: string) {
         className: "font-medium text-teal-700 underline",
       },
       "Availability",
+    ),
+    " · ",
+    createElement(
+      Link,
+      {
+        href: `/admin/teachers/${teacherId}/edit?focus=delete`,
+        className: "font-medium text-red-700 underline",
+      },
+      "Delete",
     ),
   );
 }

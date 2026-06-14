@@ -6,6 +6,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { deleteParentAccount } from "@/server/admin/delete-parent";
+import { deleteStudentRecord } from "@/server/admin/delete-student";
+import { deleteTeacherAccount } from "@/server/admin/delete-teacher";
 
 async function requireAdmin() {
   const session = await auth();
@@ -186,6 +189,88 @@ export async function adminUpdateTeacherAction(
   }
 }
 
+export async function adminDeleteTeacherAction(
+  _prev: AdminUserFormState,
+  formData: FormData,
+): Promise<AdminUserFormState> {
+  try {
+    try {
+      await requireAdmin();
+    } catch {
+      return { ok: false, error: "Not authorized" };
+    }
+
+    const teacherId = String(formData.get("teacherId") ?? "").trim();
+    if (!teacherId) return { ok: false, error: "Teacher not found" };
+    if (formData.get("confirmDelete") !== "on") {
+      return { ok: false, error: "Confirm deletion to continue" };
+    }
+
+    const result = await deleteTeacherAccount(teacherId);
+    if (!result.ok) return { ok: false, error: result.error };
+
+    revalidateUserPaths();
+    revalidatePath("/admin/bookings");
+    revalidatePath(`/admin/teachers/${teacherId}/edit`);
+    return { ok: true, error: null };
+  } catch (e) {
+    console.error("adminDeleteTeacherAction failed", e);
+    return { ok: false, error: "Could not delete teacher. Please try again." };
+  }
+}
+
+export async function adminDeleteStudentAction(
+  _prev: AdminUserFormState,
+  formData: FormData,
+): Promise<AdminUserFormState> {
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: "Not authorized" };
+  }
+
+  const studentId = String(formData.get("studentId") ?? "").trim();
+  if (!studentId) return { ok: false, error: "Student not found" };
+
+  if (formData.get("confirmDelete") !== "on") {
+    return { ok: false, error: "Confirm deletion to continue" };
+  }
+
+  const result = await deleteStudentRecord(studentId);
+  if (!result.ok) return { ok: false, error: result.error };
+
+  revalidateUserPaths();
+  revalidatePath("/admin/bookings");
+  revalidatePath("/admin/credits");
+  return { ok: true, error: null };
+}
+
+export async function adminDeleteParentAction(
+  _prev: AdminUserFormState,
+  formData: FormData,
+): Promise<AdminUserFormState> {
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: "Not authorized" };
+  }
+
+  const userId = String(formData.get("userId") ?? "").trim();
+  if (!userId) return { ok: false, error: "Parent not found" };
+
+  if (formData.get("confirmDelete") !== "on") {
+    return { ok: false, error: "Confirm deletion to continue" };
+  }
+
+  const result = await deleteParentAccount(userId);
+  if (!result.ok) return { ok: false, error: result.error };
+
+  revalidateUserPaths();
+  revalidatePath("/admin/bookings");
+  revalidatePath("/admin/credits");
+  return { ok: true, error: null };
+}
+
 const updateParentSchema = z.object({
   userId: z.string().min(1),
   name: z.string().min(1),
@@ -334,6 +419,7 @@ const updateStudentSchema = z.object({
   isActive: z.coerce.boolean(),
   primaryTeacherId: z.string().optional(),
   linkParentProfileId: z.string().optional(),
+  newPassword: z.string().optional(),
 });
 
 export async function adminUpdateStudentAction(
@@ -356,14 +442,37 @@ export async function adminUpdateStudentAction(
     isActive: formData.get("isActive") === "on",
     primaryTeacherId: String(formData.get("primaryTeacherId") ?? "").trim() || undefined,
     linkParentProfileId: String(formData.get("linkParentProfileId") ?? "").trim() || undefined,
+    newPassword: String(formData.get("newPassword") ?? "").trim() || undefined,
   });
   if (!parsed.success) return { ok: false, error: "Invalid form" };
 
-  const student = await prisma.student.findUnique({ where: { id: parsed.data.studentId } });
+  const student = await prisma.student.findUnique({
+    where: { id: parsed.data.studentId },
+    include: { user: true },
+  });
   if (!student) return { ok: false, error: "Student not found" };
 
+  if (parsed.data.newPassword) {
+    if (!student.userId) {
+      return { ok: false, error: "This student has no login account to reset" };
+    }
+    if (parsed.data.newPassword.length < 8) {
+      return { ok: false, error: "Password must be at least 8 characters" };
+    }
+  }
+
   try {
+    const passwordHash =
+      parsed.data.newPassword && student.userId ? await hash(parsed.data.newPassword, 12) : undefined;
+
     await prisma.$transaction(async (tx) => {
+      if (passwordHash && student.userId) {
+        await tx.user.update({
+          where: { id: student.userId },
+          data: { passwordHash },
+        });
+      }
+
       await tx.student.update({
         where: { id: student.id },
         data: {

@@ -6,13 +6,23 @@ import { DataTable } from "@/components/dashboard/data-table";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { getAdminParentsTableRows } from "@/server/queries/admin-users";
 
-export default async function AdminParentsPage() {
+export default async function AdminParentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string }>;
+}) {
+  const { deleted } = await searchParams;
   const { rows, dbError } = await getAdminParentsTableRows();
 
   return (
     <div className="space-y-6">
       {dbError ? (
         <DbBanner message="Database unavailable. Set DATABASE_URL, run npm run db:push and npm run db:seed." />
+      ) : null}
+      {deleted ? (
+        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          Parent account deleted.
+        </p>
       ) : null}
 
       <SectionCard

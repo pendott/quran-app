@@ -1,13 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdminDeleteTeacherForm } from "@/components/admin/admin-delete-teacher-form";
 import { AdminEditTeacherForm } from "@/components/admin/admin-edit-teacher-form";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { getAdminTeacherForEdit } from "@/server/queries/admin-users";
 
-type Props = { params: Promise<{ teacherId: string }> };
+type Props = {
+  params: Promise<{ teacherId: string }>;
+  searchParams: Promise<{ focus?: string }>;
+};
 
-export default async function AdminEditTeacherPage({ params }: Props) {
+export default async function AdminEditTeacherPage({ params, searchParams }: Props) {
   const { teacherId } = await params;
+  const { focus } = await searchParams;
   const teacher = await getAdminTeacherForEdit(teacherId);
   if (!teacher) notFound();
 
@@ -30,6 +35,13 @@ export default async function AdminEditTeacherPage({ params }: Props) {
         description={`${teacher.name} · ${teacher.email}`}
       >
         <AdminEditTeacherForm teacher={teacher} />
+      </SectionCard>
+
+      <SectionCard
+        title="Delete teacher profile and account"
+        description="Permanently remove this teacher from jomngaji.my — login, profile, availability, and assignments."
+      >
+        <AdminDeleteTeacherForm teacher={teacher} scrollToDelete={focus === "delete"} />
       </SectionCard>
     </div>
   );
