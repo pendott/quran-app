@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdminDeleteTeacherForm } from "@/components/admin/admin-delete-teacher-form";
 import { AdminEditTeacherForm } from "@/components/admin/admin-edit-teacher-form";
 import { SectionCard } from "@/components/dashboard/section-card";
 import { getAdminTeacherForEdit } from "@/server/queries/admin-users";
@@ -30,6 +31,13 @@ export default async function AdminEditTeacherPage({ params }: Props) {
         description={`${teacher.name} · ${teacher.email}`}
       >
         <AdminEditTeacherForm teacher={teacher} />
+      </SectionCard>
+
+      <SectionCard
+        title="Delete teacher"
+        description="Permanently remove this teacher account from jomngaji.my."
+      >
+        <AdminDeleteTeacherForm teacher={teacher} />
       </SectionCard>
     </div>
   );

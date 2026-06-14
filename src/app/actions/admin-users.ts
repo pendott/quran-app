@@ -3,9 +3,13 @@
 import { UserRole, UserStatus } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { deleteParentAccount } from "@/server/admin/delete-parent";
+import { deleteStudentRecord } from "@/server/admin/delete-student";
+import { deleteTeacherAccount } from "@/server/admin/delete-teacher";
 
 async function requireAdmin() {
   const session = await auth();
@@ -184,6 +188,82 @@ export async function adminUpdateTeacherAction(
     console.error(e);
     return { ok: false, error: "Could not save teacher" };
   }
+}
+
+export async function adminDeleteTeacherAction(
+  _prev: AdminUserFormState,
+  formData: FormData,
+): Promise<AdminUserFormState> {
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: "Not authorized" };
+  }
+
+  const teacherId = String(formData.get("teacherId") ?? "").trim();
+  if (!teacherId) return { ok: false, error: "Teacher not found" };
+
+  const confirm = formData.get("confirmDelete") === "on";
+  if (!confirm) return { ok: false, error: "Confirm deletion to continue" };
+
+  const result = await deleteTeacherAccount(teacherId);
+  if (!result.ok) return { ok: false, error: result.error };
+
+  revalidateUserPaths();
+  revalidatePath("/admin/bookings");
+  redirect("/admin/teachers?deleted=1");
+}
+
+export async function adminDeleteStudentAction(
+  _prev: AdminUserFormState,
+  formData: FormData,
+): Promise<AdminUserFormState> {
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: "Not authorized" };
+  }
+
+  const studentId = String(formData.get("studentId") ?? "").trim();
+  if (!studentId) return { ok: false, error: "Student not found" };
+
+  if (formData.get("confirmDelete") !== "on") {
+    return { ok: false, error: "Confirm deletion to continue" };
+  }
+
+  const result = await deleteStudentRecord(studentId);
+  if (!result.ok) return { ok: false, error: result.error };
+
+  revalidateUserPaths();
+  revalidatePath("/admin/bookings");
+  revalidatePath("/admin/credits");
+  redirect("/admin/students?deleted=1");
+}
+
+export async function adminDeleteParentAction(
+  _prev: AdminUserFormState,
+  formData: FormData,
+): Promise<AdminUserFormState> {
+  try {
+    await requireAdmin();
+  } catch {
+    return { ok: false, error: "Not authorized" };
+  }
+
+  const userId = String(formData.get("userId") ?? "").trim();
+  if (!userId) return { ok: false, error: "Parent not found" };
+
+  if (formData.get("confirmDelete") !== "on") {
+    return { ok: false, error: "Confirm deletion to continue" };
+  }
+
+  const result = await deleteParentAccount(userId);
+  if (!result.ok) return { ok: false, error: result.error };
+
+  revalidateUserPaths();
+  revalidatePath("/admin/bookings");
+  revalidatePath("/admin/credits");
+  redirect("/admin/parents?deleted=1");
 }
 
 const updateParentSchema = z.object({

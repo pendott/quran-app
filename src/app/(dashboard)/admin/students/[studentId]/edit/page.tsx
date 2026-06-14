@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdminDeleteStudentForm } from "@/components/admin/admin-delete-student-form";
 import { AdminEditStudentForm } from "@/components/admin/admin-edit-student-form";
 import { AdminGrantCreditsForm } from "@/components/admin/admin-grant-credits-form";
 import { SectionCard } from "@/components/dashboard/section-card";
@@ -45,6 +46,13 @@ export default async function AdminEditStudentPage({ params }: Props) {
         ) : (
           <AdminEditStudentForm student={student} parents={pickers.parents} teachers={pickers.teachers} />
         )}
+      </SectionCard>
+
+      <SectionCard
+        title="Delete student"
+        description="Permanently remove this learner profile from jomngaji.my."
+      >
+        <AdminDeleteStudentForm student={student} />
       </SectionCard>
     </div>
   );

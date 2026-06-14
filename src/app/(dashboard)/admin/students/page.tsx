@@ -6,13 +6,23 @@ import { SectionCard } from "@/components/dashboard/section-card";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { getAdminStudentRoster } from "@/server/queries/admin";
 
-export default async function AdminStudentsPage() {
+export default async function AdminStudentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string }>;
+}) {
+  const { deleted } = await searchParams;
   const { rows, stats, dbError } = await getAdminStudentRoster();
 
   return (
     <div className="space-y-6">
       {dbError ? (
         <DbBanner message="Database unavailable. Set DATABASE_URL, run npm run db:push and npm run db:seed." />
+      ) : null}
+      {deleted ? (
+        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          Student profile deleted.
+        </p>
       ) : null}
       <section className="grid gap-4 md:grid-cols-3">
         {stats.map((stat) => (
