@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { isNextRedirectError } from "@/lib/next-redirect";
 import { deleteParentAccount } from "@/server/admin/delete-parent";
 import { deleteStudentRecord } from "@/server/admin/delete-student";
 import { deleteTeacherAccount } from "@/server/admin/delete-teacher";
@@ -195,25 +196,28 @@ export async function adminDeleteTeacherFormAction(formData: FormData): Promise<
   const teacherId = String(formData.get("teacherId") ?? "").trim();
   const returnTo = teacherId ? `/admin/teachers/${teacherId}/edit` : "/admin/teachers";
 
-  const fail = (message: string) => {
-    redirect(`${returnTo}?deleteError=${encodeURIComponent(message)}#delete-teacher`);
+  const redirectWithError = (message: string): never => {
+    redirect(`${returnTo}?deleteError=${encodeURIComponent(message)}`);
   };
 
   try {
     await requireAdmin();
-  } catch {
-    fail("Not authorized");
+
+    if (!teacherId) redirectWithError("Teacher not found");
+    if (formData.get("confirmDelete") !== "on") redirectWithError("Confirm deletion to continue");
+
+    const result = await deleteTeacherAccount(teacherId);
+    if (!result.ok) redirectWithError(result.error);
+
+    revalidateUserPaths();
+    revalidatePath("/admin/bookings");
+    revalidatePath(`/admin/teachers/${teacherId}/edit`);
+    redirect("/admin/teachers?deleted=1");
+  } catch (error) {
+    if (isNextRedirectError(error)) throw error;
+    console.error("adminDeleteTeacherFormAction failed", error);
+    redirectWithError("Could not delete teacher. Please try again.");
   }
-
-  if (!teacherId) fail("Teacher not found");
-  if (formData.get("confirmDelete") !== "on") fail("Confirm deletion to continue");
-
-  const result = await deleteTeacherAccount(teacherId);
-  if (!result.ok) fail(result.error);
-
-  revalidateUserPaths();
-  revalidatePath("/admin/bookings");
-  redirect("/admin/teachers?deleted=1");
 }
 
 export async function adminDeleteStudentAction(

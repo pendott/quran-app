@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { adminDeleteTeacherFormAction } from "@/app/actions/admin-users";
 import type { AdminTeacherForEdit } from "@/server/queries/admin-users";
 
@@ -9,6 +10,12 @@ type Props = {
 };
 
 export function AdminDeleteTeacherForm({ teacher, deleteError }: Props) {
+  useEffect(() => {
+    if (deleteError) {
+      document.getElementById("delete-teacher")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [deleteError]);
+
   return (
     <form
       id="delete-teacher"
