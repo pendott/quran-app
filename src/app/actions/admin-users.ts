@@ -3,7 +3,6 @@
 import { UserRole, UserStatus } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
@@ -211,7 +210,7 @@ export async function adminDeleteTeacherAction(
 
   revalidateUserPaths();
   revalidatePath("/admin/bookings");
-  redirect("/admin/teachers?deleted=1");
+  return { ok: true, error: null };
 }
 
 export async function adminDeleteStudentAction(
@@ -237,7 +236,7 @@ export async function adminDeleteStudentAction(
   revalidateUserPaths();
   revalidatePath("/admin/bookings");
   revalidatePath("/admin/credits");
-  redirect("/admin/students?deleted=1");
+  return { ok: true, error: null };
 }
 
 export async function adminDeleteParentAction(
@@ -263,7 +262,7 @@ export async function adminDeleteParentAction(
   revalidateUserPaths();
   revalidatePath("/admin/bookings");
   revalidatePath("/admin/credits");
-  redirect("/admin/parents?deleted=1");
+  return { ok: true, error: null };
 }
 
 const updateParentSchema = z.object({

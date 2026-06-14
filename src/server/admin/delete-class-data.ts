@@ -45,3 +45,24 @@ export async function deletePackagePurchases(tx: Tx, purchaseIds: string[]) {
   await tx.payment.deleteMany({ where: { packagePurchaseId: { in: purchaseIds } } });
   await tx.packagePurchase.deleteMany({ where: { id: { in: purchaseIds } } });
 }
+
+/** Clears bookings, packages, and payments that block User deletion (onDelete: Restrict). */
+export async function clearUserFinancialRecords(tx: Tx, userId: string) {
+  const bookingIds = (
+    await tx.booking.findMany({
+      where: { bookedById: userId },
+      select: { id: true },
+    })
+  ).map((b) => b.id);
+  await deleteBookings(tx, bookingIds);
+
+  const purchaseIds = (
+    await tx.packagePurchase.findMany({
+      where: { purchasedById: userId },
+      select: { id: true },
+    })
+  ).map((p) => p.id);
+  await deletePackagePurchases(tx, purchaseIds);
+
+  await tx.payment.deleteMany({ where: { payerId: userId } });
+}

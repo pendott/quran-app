@@ -1,5 +1,16 @@
 import { prisma } from "@/lib/db";
-import { deleteBookings, deleteClassSessions } from "@/server/admin/delete-class-data";
+import {
+  clearUserFinancialRecords,
+  deleteBookings,
+  deleteClassSessions,
+} from "@/server/admin/delete-class-data";
+
+function deleteErrorMessage(e: unknown) {
+  if (e && typeof e === "object" && "code" in e && e.code === "P2003") {
+    return "Cannot delete teacher — related bookings or payments still exist. Try again or contact support.";
+  }
+  return "Could not delete teacher";
+}
 
 export async function deleteTeacherAccount(teacherId: string): Promise<{ ok: true } | { ok: false; error: string }> {
   const teacher = await prisma.teacher.findUnique({
@@ -28,12 +39,13 @@ export async function deleteTeacherAccount(teacherId: string): Promise<{ ok: tru
       await deleteClassSessions(tx, remainingSessionIds);
 
       await tx.classNote.deleteMany({ where: { teacherId } });
+      await clearUserFinancialRecords(tx, teacher.userId);
       await tx.user.delete({ where: { id: teacher.userId } });
     });
 
     return { ok: true };
   } catch (e) {
-    console.error(e);
-    return { ok: false, error: "Could not delete teacher" };
+    console.error("deleteTeacherAccount failed", e);
+    return { ok: false, error: deleteErrorMessage(e) };
   }
 }

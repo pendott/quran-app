@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect } from "react";
 import {
   adminDeleteTeacherAction,
   adminUserFormInitial,
@@ -10,7 +11,14 @@ import type { AdminTeacherForEdit } from "@/server/queries/admin-users";
 type Props = { teacher: AdminTeacherForEdit };
 
 export function AdminDeleteTeacherForm({ teacher }: Props) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(adminDeleteTeacherAction, adminUserFormInitial);
+
+  useEffect(() => {
+    if (state?.ok) {
+      router.replace("/admin/teachers?deleted=1");
+    }
+  }, [state, router]);
 
   return (
     <form
