@@ -1,8 +1,5 @@
 import { sendEmailViaResend } from "@/lib/integrations/reminders/resend-email";
-
-function appBaseUrl() {
-  return (process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "https://jomngaji.my").replace(/\/$/, "");
-}
+import { publicLoginUrl } from "@/lib/app-url";
 
 function escapeHtml(text: string) {
   return text
@@ -40,7 +37,7 @@ export async function sendRegistrationWelcomeEmail(params: {
 }) {
   const name = escapeHtml(params.name.trim());
   const learnerName = escapeHtml(params.learnerName.trim());
-  const loginUrl = `${appBaseUrl()}/login?callbackUrl=%2Fstudents`;
+  const loginUrl = publicLoginUrl("/students");
   const isParent = params.accountType === "parent";
 
   const intro = isParent

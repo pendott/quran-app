@@ -1,8 +1,5 @@
 import { sendEmailViaResend } from "@/lib/integrations/reminders/resend-email";
-
-function appBaseUrl() {
-  return (process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "https://jomngaji.my").replace(/\/$/, "");
-}
+import { publicLoginUrl } from "@/lib/app-url";
 
 function escapeHtml(text: string) {
   return text
@@ -61,7 +58,7 @@ export async function sendTeacherApplicationApprovedEmail(params: {
 }) {
   const name = escapeHtml(params.name.trim());
   const password = escapeHtml(params.password);
-  const loginUrl = `${appBaseUrl()}/login`;
+  const loginUrl = publicLoginUrl("/teacher");
   const html = emailLayout(`
     <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;">Your teacher application is approved</h1>
     <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#334155;">Hi ${name},</p>

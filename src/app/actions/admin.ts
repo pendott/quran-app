@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { getPublicAppUrl } from "@/lib/app-url";
 import { cancelBookingInTransaction } from "@/server/booking/cancel-booking";
 
 async function requireAdmin() {
@@ -119,8 +120,7 @@ export async function adminCreateInviteAction(_prev: unknown, formData: FormData
     },
   });
 
-  const base = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
-  const inviteUrl = `${base.replace(/\/$/, "")}/invite/${token}`;
+  const inviteUrl = `${getPublicAppUrl()}/invite/${token}`;
   revalidatePath("/admin/students");
   revalidatePath("/admin/parents");
   return { ok: true as const, error: null, inviteUrl };

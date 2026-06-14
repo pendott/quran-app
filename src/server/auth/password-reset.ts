@@ -3,6 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { hash } from "bcryptjs";
 import { addHours } from "date-fns";
 import { prisma } from "@/lib/db";
+import { getPublicAppUrl } from "@/lib/app-url";
 import { sendPasswordResetEmail } from "@/server/auth/password-reset-emails";
 
 const RESET_PREFIX = "reset:";
@@ -46,7 +47,7 @@ export async function requestPasswordReset(emailRaw: string): Promise<{ ok: true
     void sendPasswordResetEmail({
       to: email,
       name: user.name ?? email,
-      resetUrl: `${appBaseUrl()}/reset-password/${token}`,
+      resetUrl: `${getPublicAppUrl()}/reset-password/${token}`,
     });
   }
 
@@ -96,8 +97,4 @@ export async function resetPasswordWithToken(
   ]);
 
   return { ok: true };
-}
-
-function appBaseUrl() {
-  return (process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "https://jomngaji.my").replace(/\/$/, "");
 }
