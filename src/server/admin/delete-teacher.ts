@@ -29,38 +29,38 @@ export async function deleteTeacherAccount(teacherId: string): Promise<{ ok: tru
   if (!teacher.user) return { ok: false, error: "Teacher login account not found" };
   if (teacher.user.role !== "TEACHER") return { ok: false, error: "User is not a teacher" };
 
+  const userId = teacher.userId;
+
   try {
-    await prisma.$transaction(
-      async (tx) => {
-        const bookingIds = (
-          await tx.booking.findMany({
-            where: { teacherId },
-            select: { id: true },
-          })
-        ).map((b) => b.id);
-        await deleteBookings(tx, bookingIds);
+    await prisma.$transaction(async (tx) => {
+      const bookingIds = (
+        await tx.booking.findMany({
+          where: { teacherId },
+          select: { id: true },
+        })
+      ).map((b) => b.id);
+      await deleteBookings(tx, bookingIds);
 
-        const remainingSessionIds = (
-          await tx.classSession.findMany({
-            where: { teacherId },
-            select: { id: true },
-          })
-        ).map((s) => s.id);
-        await deleteClassSessions(tx, remainingSessionIds);
+      const remainingSessionIds = (
+        await tx.classSession.findMany({
+          where: { teacherId },
+          select: { id: true },
+        })
+      ).map((s) => s.id);
+      await deleteClassSessions(tx, remainingSessionIds);
 
-        await tx.classNote.deleteMany({ where: { teacherId } });
-        await tx.studentTeacherAssignment.deleteMany({ where: { teacherId } });
-        await tx.teacherAvailability.deleteMany({ where: { teacherId } });
-        await tx.teacherApplication.updateMany({
-          where: { createdTeacherId: teacherId },
-          data: { createdTeacherId: null },
-        });
-        await tx.reminder.deleteMany({ where: { recipientUserId: teacher.userId } });
-        await clearUserFinancialRecords(tx, teacher.userId);
-        await tx.user.delete({ where: { id: teacher.userId } });
-      },
-      { timeout: 30_000 },
-    );
+      await tx.classNote.deleteMany({ where: { teacherId } });
+      await tx.studentTeacherAssignment.deleteMany({ where: { teacherId } });
+      await tx.teacherAvailability.deleteMany({ where: { teacherId } });
+      await tx.teacherApplication.updateMany({
+        where: { createdTeacherId: teacherId },
+        data: { createdTeacherId: null },
+      });
+      await tx.reminder.deleteMany({ where: { recipientUserId: userId } });
+      await clearUserFinancialRecords(tx, userId);
+      await tx.teacher.delete({ where: { id: teacherId } });
+      await tx.user.delete({ where: { id: userId } });
+    });
 
     return { ok: true };
   } catch (e) {

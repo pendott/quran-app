@@ -1,25 +1,38 @@
 "use client";
 
-import { useEffect } from "react";
-import { adminDeleteTeacherFormAction } from "@/app/actions/admin-users";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect } from "react";
+import {
+  adminDeleteTeacherAction,
+  adminUserFormInitial,
+} from "@/app/actions/admin-users";
 import type { AdminTeacherForEdit } from "@/server/queries/admin-users";
 
 type Props = {
   teacher: AdminTeacherForEdit;
-  deleteError?: string | null;
+  scrollToDelete?: boolean;
 };
 
-export function AdminDeleteTeacherForm({ teacher, deleteError }: Props) {
+export function AdminDeleteTeacherForm({ teacher, scrollToDelete }: Props) {
+  const router = useRouter();
+  const [state, formAction, pending] = useActionState(adminDeleteTeacherAction, adminUserFormInitial);
+
   useEffect(() => {
-    if (deleteError) {
+    if (state?.ok) {
+      router.replace("/admin/teachers?deleted=1");
+    }
+  }, [state, router]);
+
+  useEffect(() => {
+    if (scrollToDelete) {
       document.getElementById("delete-teacher")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, [deleteError]);
+  }, [scrollToDelete]);
 
   return (
     <form
       id="delete-teacher"
-      action={adminDeleteTeacherFormAction}
+      action={formAction}
       className="space-y-3"
       onSubmit={(e) => {
         const message = [
@@ -36,8 +49,8 @@ export function AdminDeleteTeacherForm({ teacher, deleteError }: Props) {
       }}
     >
       <input type="hidden" name="teacherId" value={teacher.id} />
-      {deleteError ? (
-        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{deleteError}</p>
+      {state?.error ? (
+        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{state.error}</p>
       ) : null}
       <p className="text-sm text-slate-600">
         Removes <strong>{teacher.email}</strong> login and the full teacher profile.
@@ -59,9 +72,10 @@ export function AdminDeleteTeacherForm({ teacher, deleteError }: Props) {
       </label>
       <button
         type="submit"
-        className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-100"
+        disabled={pending}
+        className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-100 disabled:opacity-50"
       >
-        Delete profile and account
+        {pending ? "Deleting…" : "Delete profile and account"}
       </button>
     </form>
   );

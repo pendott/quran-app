@@ -3,11 +3,9 @@
 import { UserRole, UserStatus } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { isNextRedirectError } from "@/lib/next-redirect";
 import { deleteParentAccount } from "@/server/admin/delete-parent";
 import { deleteStudentRecord } from "@/server/admin/delete-student";
 import { deleteTeacherAccount } from "@/server/admin/delete-teacher";
@@ -191,32 +189,33 @@ export async function adminUpdateTeacherAction(
   }
 }
 
-/** Plain form action — redirect works reliably (unlike useActionState + redirect). */
-export async function adminDeleteTeacherFormAction(formData: FormData): Promise<void> {
-  const teacherId = String(formData.get("teacherId") ?? "").trim();
-  const returnTo = teacherId ? `/admin/teachers/${teacherId}/edit` : "/admin/teachers";
-
-  const redirectWithError = (message: string): never => {
-    redirect(`${returnTo}?deleteError=${encodeURIComponent(message)}`);
-  };
-
+export async function adminDeleteTeacherAction(
+  _prev: AdminUserFormState,
+  formData: FormData,
+): Promise<AdminUserFormState> {
   try {
-    await requireAdmin();
+    try {
+      await requireAdmin();
+    } catch {
+      return { ok: false, error: "Not authorized" };
+    }
 
-    if (!teacherId) redirectWithError("Teacher not found");
-    if (formData.get("confirmDelete") !== "on") redirectWithError("Confirm deletion to continue");
+    const teacherId = String(formData.get("teacherId") ?? "").trim();
+    if (!teacherId) return { ok: false, error: "Teacher not found" };
+    if (formData.get("confirmDelete") !== "on") {
+      return { ok: false, error: "Confirm deletion to continue" };
+    }
 
     const result = await deleteTeacherAccount(teacherId);
-    if (!result.ok) redirectWithError(result.error);
+    if (!result.ok) return { ok: false, error: result.error };
 
     revalidateUserPaths();
     revalidatePath("/admin/bookings");
     revalidatePath(`/admin/teachers/${teacherId}/edit`);
-    redirect("/admin/teachers?deleted=1");
-  } catch (error) {
-    if (isNextRedirectError(error)) throw error;
-    console.error("adminDeleteTeacherFormAction failed", error);
-    redirectWithError("Could not delete teacher. Please try again.");
+    return { ok: true, error: null };
+  } catch (e) {
+    console.error("adminDeleteTeacherAction failed", e);
+    return { ok: false, error: "Could not delete teacher. Please try again." };
   }
 }
 

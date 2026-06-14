@@ -279,7 +279,7 @@ export function teacherManageLinks(teacherId: string) {
     createElement(
       Link,
       {
-        href: `/admin/teachers/${teacherId}/edit#delete-teacher`,
+        href: `/admin/teachers/${teacherId}/edit?focus=delete`,
         className: "font-medium text-red-700 underline",
       },
       "Delete",

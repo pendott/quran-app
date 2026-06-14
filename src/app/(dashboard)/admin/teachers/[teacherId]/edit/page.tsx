@@ -7,12 +7,12 @@ import { getAdminTeacherForEdit } from "@/server/queries/admin-users";
 
 type Props = {
   params: Promise<{ teacherId: string }>;
-  searchParams: Promise<{ deleteError?: string }>;
+  searchParams: Promise<{ focus?: string }>;
 };
 
 export default async function AdminEditTeacherPage({ params, searchParams }: Props) {
   const { teacherId } = await params;
-  const { deleteError } = await searchParams;
+  const { focus } = await searchParams;
   const teacher = await getAdminTeacherForEdit(teacherId);
   if (!teacher) notFound();
 
@@ -41,7 +41,7 @@ export default async function AdminEditTeacherPage({ params, searchParams }: Pro
         title="Delete teacher profile and account"
         description="Permanently remove this teacher from jomngaji.my — login, profile, availability, and assignments."
       >
-        <AdminDeleteTeacherForm teacher={teacher} deleteError={deleteError} />
+        <AdminDeleteTeacherForm teacher={teacher} scrollToDelete={focus === "delete"} />
       </SectionCard>
     </div>
   );
